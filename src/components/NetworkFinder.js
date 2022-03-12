@@ -1,97 +1,107 @@
-import _ from 'lodash'
-import axios from 'axios'
-import React, { useEffect, useReducer } from 'react';
+import _ from "lodash";
+import axios from "axios";
+import React, { useEffect, useReducer } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Network from '../utils/Network.mjs'
-import { overrideNetworks } from '../utils/Helpers.mjs'
-import App from './App';
+import Network from "../utils/Network.mjs";
+import { overrideNetworks } from "../utils/Helpers.mjs";
+import App from "./App";
 
-import {
-  Spinner
-} from 'react-bootstrap';
+import { Spinner } from "react-bootstrap";
 
-import networksData from '../networks.json';
+import networksData from "../networks.json";
 
 function NetworkFinder() {
   const params = useParams();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const [state, setState] = useReducer(
-    (state, newState) => ({...state, ...newState}),
-    {loading: true, networks: [], operators: [], validators: []}
-  )
+    (state, newState) => ({ ...state, ...newState }),
+    { loading: true, networks: [], operators: [], validators: [] }
+  );
 
   const getNetworks = async () => {
-    const registryNetworks = await axios.get('https://registry.cosmos.directory')
-      .then(res => res.data)
-      .then(data => data.reduce((a, v) => ({ ...a, [v.directory]: v}), {}))
+    const registryNetworks = await axios
+      .get("https://registry.cosmos.directory")
+      .then((res) => res.data)
+      .then((data) => data.reduce((a, v) => ({ ...a, [v.directory]: v }), {}));
 
-    const networks = networksData.filter(el => el.enabled !== false).map(data => {
-      const registryData = registryNetworks[data.name] || {}
-      return {...registryData, ...data}
-    })
-    return _.compact(networks).reduce((a, v) => ({ ...a, [v.name]: v}), {})
-  }
+    const networks = networksData
+      .filter((el) => el.enabled !== false)
+      .map((data) => {
+        const registryData = registryNetworks[data.name] || {};
+        return { ...registryData, ...data };
+      });
+    return _.compact(networks).reduce((a, v) => ({ ...a, [v.name]: v }), {});
+  };
 
   const changeNetwork = (network, validators) => {
-    const operators = Object.keys(validators).length ? network.getOperators(validators) : []
+    const operators = Object.keys(validators).length
+      ? network.getOperators(validators)
+      : [];
     setState({
       network: network,
       validators: validators,
-      operators: operators
-    })
+      operators: operators,
+    });
 
     navigate("/" + network.name);
-  }
+  };
 
   useEffect(() => {
-    if(!Object.keys(state.networks).length){
-      setState({loading: true})
-      getNetworks().then(networks => {
-        setState({networks: networks})
-      })
+    if (!Object.keys(state.networks).length) {
+      setState({ loading: true });
+      getNetworks().then((networks) => {
+        setState({ networks: networks });
+      });
     }
-  }, [state.networks])
+  }, [state.networks]);
 
   useEffect(() => {
-    if(Object.keys(state.networks).length && !state.network){
-      const networkName = params.network || Object.keys(state.networks)[0]
-      const data = state.networks[networkName]
-      if(params.network && !data){
+    if (Object.keys(state.networks).length && !state.network) {
+      const networkName = params.network || Object.keys(state.networks)[0];
+      const data = state.networks[networkName];
+      if (params.network && !data) {
         navigate("/" + Object.keys(state.networks)[0]);
       }
-      if(!data){
-        setState({loading: false})
-        return
+      if (!data) {
+        setState({ loading: false });
+        return;
       }
-      if(!params.network){
+      if (!params.network) {
         navigate("/" + networkName);
       }
-      Network(data).then(network => {
-        setState({network: network})
-      })
+      Network(data).then((network) => {
+        setState({ network: network });
+      });
     }
-  }, [state.networks, state.network, params.network, navigate])
+  }, [state.networks, state.network, params.network, navigate]);
 
   useEffect(() => {
-    if(state.error) return
+    if (state.error) return;
 
-    if(state.network && (!Object.keys(state.validators).length)){
-      if(!state.network.connected){
+    if (state.network && !Object.keys(state.validators).length) {
+      if (!state.network.connected) {
         return setState({
-          loading: false
-        })
+          loading: false,
+        });
       }
 
-      state.network.getValidators().then(validators => {
-        setState({
-          validators,
-          operators: state.network.getOperators(validators),
-          loading: false
-        })
-      }, error => setState({loading: false, error: 'Unable to connect right now, try again'}))
+      state.network.getValidators().then(
+        (validators) => {
+          setState({
+            validators,
+            operators: state.network.getOperators(validators),
+            loading: false,
+          });
+        },
+        (error) =>
+          setState({
+            loading: false,
+            error: "Unable to connect right now, try again",
+          })
+      );
     }
-  }, [state.network])
+  }, [state.network]);
 
   if (state.loading) {
     return (
@@ -100,21 +110,27 @@ function NetworkFinder() {
           <span className="visually-hidden">Loading...</span>
         </Spinner>
       </div>
-    )
+    );
   }
 
   if (state.error) {
-    return (
-      <p>Loading failed</p>
-    )
+    return <p>Loading failed</p>;
   }
 
-  if(!state.network){
-    return <p>Page not found</p>
+  if (!state.network) {
+    return <p>Page not found</p>;
   }
 
-  return <App networks={state.networks} network={state.network} operators={state.operators} validators={state.validators}
-    changeNetwork={(network, validators) => changeNetwork(network, validators)} />;
+  return (
+    <App
+      networks={state.networks}
+      network={state.network}
+      validators={state.validators}
+      changeNetwork={(network, validators) =>
+        changeNetwork(network, validators)
+      }
+    />
+  );
 }
 
-export default NetworkFinder
+export default NetworkFinder;
