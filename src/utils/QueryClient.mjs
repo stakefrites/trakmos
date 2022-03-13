@@ -9,6 +9,7 @@ import {
   setupMintExtension,
   setupGovExtension,
 } from "@cosmjs/stargate";
+import Chain from "./Chain.mjs";
 
 import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
 import { Bech32 } from "@cosmjs/encoding";
@@ -209,9 +210,11 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     for (chain of chains) {
       console.log("chain", chain);
       const [chainName, chainConfig] = chain;
+      const chainIml = await Chain(chainConfig);
+      console.log("chainIMPL", chainIml);
       console.log("chainName", chainName, chainConfig);
 
-      const { rpcUrl, testAddress } = chainConfig;
+      const { rpcUrl } = chainConfig;
       console.log(rpcUrls);
       let rpc;
       if (typeof rpcUrl == String) {
@@ -224,7 +227,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       }
       console.log(rpc);
       const client = await makeClient(rpc);
-      const { prefix } = Bech32.decode(testAddress);
+      const { prefix } = chainIml;
       const chainAddress = Bech32.encode(prefix, bech.data);
       console.log(chainAddress);
       const rewards = await client.distribution.delegationTotalRewards(
@@ -232,10 +235,12 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       );
       const liquid = await client.bank.allBalances(chainAddress);
       const staked = await client.staking.delegatorDelegations(chainAddress);
+      const stakingRewards = rewards.total.find((val) =>
+        val.denom == chainIml.denom ? true : false
+      );
       const data = {
         name: chainName,
-        rewards: 1,
-        rewardsRaw: rewards.rewards,
+        rewards: stakingRewards.amount,
         staked: 1,
         stakedRaw: staked.delegationResponses,
         liquidRaw: liquid,

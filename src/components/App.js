@@ -20,9 +20,9 @@ import Logo2x from "../assets/logo@2x.png";
 import Logo3x from "../assets/logo@3x.png";
 
 import PoweredByAkash from "../assets/powered-by-akash.svg";
-import { Twitter, Github } from 'react-bootstrap-icons';
-import StakeFriteLogo from "../assets/Sigle_Stake_house@2x.png"
-import StakeFriteLogoLong from "../assets/Logo_Stake_house_VF_150.png"
+import { Twitter, Github } from "react-bootstrap-icons";
+import StakeFriteLogo from "../assets/Sigle_Stake_house@2x.png";
+import StakeFriteLogoLong from "../assets/Logo_Stake_house_VF_150.png";
 
 class App extends React.Component {
   constructor(props) {
@@ -262,11 +262,7 @@ class App extends React.Component {
       <Container>
         <header className="d-flex flex-wrap justify-content-between py-3 mb-4 border-bottom">
           <div className="logo d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
-              <img
-                src={StakeFriteLogoLong}
-                height="75"
-                alt="Stake Frites"
-              />
+            <img src={StakeFriteLogoLong} height="75" alt="Stake Frites" />
           </div>
           <div className="d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
             <NetworkSelect
@@ -321,17 +317,40 @@ class App extends React.Component {
           )}
         </div>
         <footer className="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-          <a href="https://akash.network" target="_blank" rel="noreferrer" className="col-md-4 mb-0 text-muted">
+          <a
+            href="https://akash.network"
+            target="_blank"
+            rel="noreferrer"
+            className="col-md-4 mb-0 text-muted"
+          >
             <img src={PoweredByAkash} alt="Powered by Akash" width={200} />
           </a>
-          <a href="https://stakefrites.co/" target="_blank" rel="noreferrer" className="col-md-4 d-flex align-items-center justify-content-center me-lg-auto link-dark text-decoration-none">
-            <span className="d-none d-sm-inline me-1">Built with 💚&nbsp;</span> by Stake Frites (🥩,🍟) 
+          <a
+            href="https://stakefrites.co/"
+            target="_blank"
+            rel="noreferrer"
+            className="col-md-4 d-flex align-items-center justify-content-center me-lg-auto link-dark text-decoration-none"
+          >
+            <span className="d-none d-sm-inline me-1">Built with 💚&nbsp;</span>{" "}
+            by Stake Frites (🥩,🍟)
           </a>
-          <div class="col-md-3 d-flex align-items-center justify-content-center me-lg-auto">
-            <a href="https://twitter.com/stakefrites_" alt="Twitter" target="_blank" rel="noreferrer" className="link-dark text-decoration-none">
+          <div className="col-md-3 d-flex align-items-center justify-content-center me-lg-auto">
+            <a
+              href="https://twitter.com/stakefrites_"
+              alt="Twitter"
+              target="_blank"
+              rel="noreferrer"
+              className="link-dark text-decoration-none"
+            >
               <Twitter color="black" size={24} />
             </a>
-            <a href="https://github.com/stakefrites" alt="Github" target="_blank" rel="noreferrer" className="link-dark text-decoration-none">
+            <a
+              href="https://github.com/stakefrites"
+              alt="Github"
+              target="_blank"
+              rel="noreferrer"
+              className="link-dark text-decoration-none"
+            >
               <Github color="black" size={24} />
             </a>
           </div>
