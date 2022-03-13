@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Intake from "./Intake";
 import { Spinner } from "react-bootstrap";
+import Button from "react-bootstrap/Button";
+import { ArrowClockwise } from "react-bootstrap-icons";
 
 function SomeTracker(props) {
   const [interval, setStateInterval] = useState();
@@ -123,8 +125,16 @@ function SomeTracker(props) {
   }
   return (
     <>
-      <button onClick={hardRefresh}>Refresh</button>
-      <Intake balances={balances} total={totalValue} {...props} />
+      <p className="text-center">
+        <Button
+          onClick={hardRefresh}
+          variant="outline-secondary"
+          className="mb-3"
+        >
+          Refresh <ArrowClockwise color="black" size={16} />
+        </Button>
+        <Intake balances={balances} total={totalValue} {...props} />
+      </p>
     </>
   );
 }
