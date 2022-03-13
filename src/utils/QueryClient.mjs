@@ -9,6 +9,7 @@ import {
   setupMintExtension,
   setupGovExtension,
 } from "@cosmjs/stargate";
+import Chain from "./Chain.mjs";
 
 import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
 import { Bech32 } from "@cosmjs/encoding";
@@ -209,9 +210,11 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     for (chain of chains) {
       console.log("chain", chain);
       const [chainName, chainConfig] = chain;
+      const chainIml = await Chain(chainConfig);
+      console.log("chainIMPL", chainIml);
       console.log("chainName", chainName, chainConfig);
 
-      const { rpcUrl, testAddress } = chainConfig;
+      const { rpcUrl } = chainConfig;
       console.log(rpcUrls);
       let rpc;
       if (typeof rpcUrl == String) {
@@ -224,7 +227,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       }
       console.log(rpc);
       const client = await makeClient(rpc);
-      const { prefix } = Bech32.decode(testAddress);
+      const { prefix } = chainIml;
       const chainAddress = Bech32.encode(prefix, bech.data);
       console.log(chainAddress);
       const rewards = await client.distribution.delegationTotalRewards(
@@ -232,14 +235,27 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       );
       const liquid = await client.bank.allBalances(chainAddress);
       const staked = await client.staking.delegatorDelegations(chainAddress);
+      let totalStaked = 0;
+      for (stake of staked.delegationResponses) {
+        console.log("loop stake:", stake, stake.balance.amount);
+        totalStaked += stake.balance.amount;
+      }
+      console.log("staked", JSON.stringify(staked), totalStaked);
+      const stakingRewards = rewards.total.find((val) =>
+        val.denom == chainIml.denom ? true : false
+      );
+      const liquidBalance = liquid.find((val) =>
+        val.denom == chainIml.denom ? true : false
+      );
+      const stakedBalance = staked.delegationResponses.find((val) =>
+        val.balance.denom == chainIml.denom ? true : false
+      );
+      console.log("chainStaked", stakingRewards);
       const data = {
         name: chainName,
-        rewards: 1,
-        rewardsRaw: rewards.rewards,
-        staked: 1,
-        stakedRaw: staked.delegationResponses,
-        liquidRaw: liquid,
-        liquid: 1,
+        rewards: stakingRewards.amount / 1000000000000000000000000,
+        staked: (stakedBalance.balance.amount / 1000000).toFixed(2),
+        liquid: (liquidBalance.amount / 1000000).toFixed(2),
         chainAddress,
       };
       portfolio.push(data);
