@@ -190,18 +190,20 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
 
   function findAvailableUrl(urls, type) {
     const path = type === "rest" ? "/blocks/latest" : "/block";
-    return findAsync(urls, (url) => {
-      return axios
-        .get(url + path, { timeout: 4000 })
-        .then((res) => res.data)
-        .then((data) => {
-          if (type === "rpc") data = data.result;
-          return data.block.header.chain_id === chainId;
-        })
-        .catch((error) => {
-          return false;
-        });
-    });
+    return Promise.any(
+      urls.map((url) => {
+        return axios
+          .get(url + path, { timeout: 10000 })
+          .then((res) => res.data)
+          .then((data) => {
+            if (type === "rpc") data = data.result;
+            if (!data.block.header.chain_id === chainId) {
+              throw false;
+            }
+            return url;
+          });
+      })
+    );
   }
 
   const getPrice = (coinGeckoId) => {
@@ -221,31 +223,26 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     for (let chainInst of chains) {
       const [chainName, chainConfig] = chainInst;
       const chainIml = await Chain(chainConfig);
-      console.log(chainIml.chainData.apis.rpc);
-      console.log(
-        await findAvailableUrl(
-          chainIml.chainData.apis.rpc.map((url) => url.address),
-          "rpc"
-        )
+      const rpcUrls = chainIml.chainData.apis.rpc.map((url) => url.address);
+      const rpcUrl = await findAvailableUrl(
+        Array.isArray(rpcUrls) ? rpcUrls : [rpcUrls],
+        "rpc"
       );
       const price = parseFloat(await getPrice(chainIml.coinGeckoId));
-
-      const { rpcUrl } = chainConfig;
-      let rpc;
-      if (typeof rpcUrl == String) {
-        rpc = rpcUrl;
-      } else {
-        rpc = rpcUrl[0];
-      }
-      const client = await makeClient(rpc);
+      const client = await makeClient(rpcUrl);
       const { prefix } = chainIml;
       const chainAddress = Bech32.encode(prefix, bech.data);
       const rewardsReq = await client.distribution.delegationTotalRewards(
         chainAddress
       );
       const liquid = await client.bank.allBalances(chainAddress);
-      const staked = await client.staking.delegatorDelegations(chainAddress);
-
+      let staked;
+      try {
+        staked = await client.staking.delegatorDelegations(chainAddress);
+      } catch (error) {
+        staked = { delegationResponses: [] };
+      }
+      console.log("staked", chainIml.prettyName, staked);
       const stakingAcc = 0;
       const rewardsAcc = 0;
 
@@ -257,20 +254,16 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
         return acc + parseInt(item.reward[0].amount);
       };
 
-      const totalTokensStaked = staked.delegationResponses.reduce(
-        stakedReducer,
-        stakingAcc
-      );
+      const totalTokensStaked =
+        staked.delegationResponses.length == 0
+          ? 0
+          : staked.delegationResponses.reduce(stakedReducer, stakingAcc);
 
-      const totalTokensRewards = rewardsReq.rewards.reduce(
-        rewardsReducer,
-        rewardsAcc
-      );
-      console.log(chainAddress, totalTokensStaked);
-
-      const stakingRewards = rewardsReq.total.find((val) =>
-        val.denom == chainIml.denom ? true : false
-      );
+      const totalTokensRewards =
+        rewardsReq.rewards.length == 0
+          ? 0
+          : rewardsReq.rewards.reduce(rewardsReducer, rewardsAcc);
+      console.log(chainAddress, "Total staked", totalTokensStaked);
 
       const liquidBal = liquid.find((val) =>
         val.denom == chainIml.denom ? true : false

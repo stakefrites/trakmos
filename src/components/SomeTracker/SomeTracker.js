@@ -8,7 +8,7 @@ function SomeTracker(props) {
   const [error, setError] = useState();
   const [totalValue, setTotalValue] = useState();
   const [balances, setBalances] = useState([{}]);
-
+  window.addEventListener("keplr_keystorechange", hardRefresh);
   const { queryClient, address } = props;
   useEffect(() => {
     // Your code here
@@ -82,9 +82,14 @@ function SomeTracker(props) {
       setIsLoaded(true);
     }
   }
-  function refresh() {
-    getPortfolio(true);
+  function refresh(hardRefresh) {
+    getPortfolio(hardRefresh);
     refreshInterval();
+  }
+
+  function hardRefresh() {
+    localStorage.removeItem(balances);
+    refresh(true);
   }
 
   function refreshInterval() {
@@ -118,7 +123,7 @@ function SomeTracker(props) {
   }
   return (
     <>
-      <button onClick={() => refresh()}>Refresh</button>
+      <button onClick={hardRefresh}>Refresh</button>
       <Intake balances={balances} total={totalValue} {...props} />
     </>
   );
