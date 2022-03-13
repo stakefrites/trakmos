@@ -73,6 +73,10 @@ class App extends React.Component {
     window.removeEventListener("keplr_keystorechange", this.connect);
   }
 
+  handleManualAddress(e) {
+    this.setState({ address: e.target.value });
+  }
+
   setNetwork() {
     const network = this.props.network;
     if (!network) return;
@@ -372,12 +376,24 @@ class App extends React.Component {
                   <br />
                   WalletConnect and mobile support is coming soon.
                   <hr />
-                  <Form className="manual-address">
+                  <Form
+                    className="manual-address"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                    }}
+                  >
                     <Form.Group className="mb-3" controlId="formBasicEmail">
-                    <Form.Label>Enter any $COSMOS address</Form.Label>
-                    <Form.Control type="text" placeholder="osmo1eh... or cosmos1eh..." />
+                      <Form.Label>Enter any $COSMOS address</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={this.state.address}
+                        onChange={this.handleManualAddress}
+                        placeholder="osmo1eh... or cosmos1eh..."
+                      />
                     </Form.Group>
-                    <Button variant="primary" type="submit">Submit</Button>
+                    <Button variant="primary" type="submit">
+                      Submit
+                    </Button>
                   </Form>
                 </AlertMessage>
               </>
