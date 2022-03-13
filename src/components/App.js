@@ -29,6 +29,8 @@ class App extends React.Component {
     super(props);
     this.state = { validatorImages: {} };
     this.connect = this.connect.bind(this);
+    this.getPortfolio = this.getPortfolio.bind(this);
+    this.getBalancesCache = this.getBalancesCache.bind(this);
     this.showNetworkSelect = this.showNetworkSelect.bind(this);
     this.getValidatorImage = this.getValidatorImage.bind(this);
     this.loadValidatorImages = this.loadValidatorImages.bind(this);
@@ -107,6 +109,7 @@ class App extends React.Component {
       );
 
       const address = await stargateClient.getAddress();
+      console.log("CONNECTING", address);
 
       stargateClient.registry.register(
         "/cosmos.authz.v1beta1.MsgGrant",
@@ -122,6 +125,73 @@ class App extends React.Component {
         error: false,
       });
       this.getBalance();
+      this.getPortfolio(true);
+    }
+  }
+
+  getBalancesCache(expireCache) {
+    const cache = localStorage.getItem("balances");
+
+    if (!cache) return;
+
+    let cacheData = {};
+    try {
+      cacheData = JSON.parse(cache);
+      const balances = JSON.parse(cacheData.balances);
+      cacheData.balances = balances;
+
+      cache = cacheData;
+    } catch {
+      cacheData.balances = cache;
+    }
+    if (!cacheData.balances) {
+      return;
+    }
+
+    if (!expireCache) {
+      return cacheData.balances;
+    }
+    if (!expireCache) return cacheData.balances;
+
+    const cacheTime = cacheData.time && new Date(cacheData.time);
+    if (!cacheData.time) return;
+
+    //const expiry = new Date() - 1000 * 60 * 60 * 24 * 3;
+    const expiry = new Date() - 1000 * 60 * 5;
+    if (cacheTime >= expiry) {
+      return cacheData.balances;
+    }
+  }
+  getPortfolio(hardRefresh) {
+    const totalacc = 0;
+    const totalReducer = (acc, item) => {
+      return acc + parseInt(item.value);
+    };
+
+    if (!this.getBalancesCache(true) || hardRefresh) {
+      console.log(this.props.networks);
+      const networks = Object.entries(this.props.networks);
+      console.log("querying with address", this.state.address);
+      const portfolio = this.state.queryClient
+        .getPortfolio(this.state.address, networks)
+        .then((data) => {
+          const totalValue = data.reduce(totalReducer, totalacc);
+          localStorage.setItem(
+            "balances",
+            JSON.stringify({ balances: data, time: +new Date() })
+          );
+          this.setState({ balances: data, totalValue, isLoaded: true });
+        });
+    } else {
+      const balances = this.getBalancesCache(true);
+      console.log("cached data ", JSON.parse(balances));
+      const newBalances = JSON.parse(balances);
+      const totalValue = newBalances.balances.reduce(totalReducer, totalacc);
+      this.setState({
+        totalValue,
+        balances: newBalances.balances,
+        isLoaded: true,
+      });
     }
   }
 
@@ -309,6 +379,10 @@ class App extends React.Component {
             <>
               <SomeTracker
                 address={this.state.address}
+                getPortfolio={this.getPortfolio}
+                isLoaded={this.state.isLoaded}
+                balances={this.state.balances}
+                total={this.state.totalValue}
                 networks={this.props.networks}
                 network={this.props.network}
                 queryClient={this.state.queryClient}
