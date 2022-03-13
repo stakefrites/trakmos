@@ -225,19 +225,14 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       const chainIml = await Chain(chainConfig);
       const rpcUrls = chainIml.chainData.apis.rpc.map((url) => url.address);
       const { decimals } = chainIml;
-      console.log(
-        "All urls ?",
-        rpcUrls,
-        chainIml,
-        decimals,
-        Math.pow(10, decimals)
-      );
       const rpcUrl = await findAvailableUrl(
         Array.isArray(rpcUrls) ? rpcUrls : [rpcUrls],
         "rpc"
       );
+      console.log("the rpc url", rpcUrl);
       const price = parseFloat(await getPrice(chainIml.coinGeckoId));
       const client = await makeClient(rpcUrl);
+      console.log("The client", client);
       const { prefix } = chainIml;
       const chainAddress = Bech32.encode(prefix, bech.data);
       const rewardsReq = await client.distribution.delegationTotalRewards(
@@ -250,7 +245,6 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       } catch (error) {
         staked = { delegationResponses: [] };
       }
-      console.log("staked", chainIml.prettyName, staked);
       const stakingAcc = 0;
       const rewardsAcc = 0;
 

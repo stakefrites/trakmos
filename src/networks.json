@@ -1,5 +1,17 @@
 [
   {
+    "name": "lumnetwork",
+    "restUrl": [
+      "https://rest.cosmos.directory/lumnetwork",
+      "https://node0.mainnet.lum.network/rest"
+    ],
+    "rpcUrl": [
+      "https://rpc.cosmos.directory/lumnetwork",
+      "https://node0.mainnet.lum.network/rpc"
+    ],
+    "authzSupport": true
+  },
+  {
     "name": "osmosis",
     "restUrl": [
       "https://rest.cosmos.directory/osmosis",
