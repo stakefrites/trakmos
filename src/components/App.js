@@ -417,56 +417,27 @@ class App extends React.Component {
             </>
           )}
         </div>
-        <footer className="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-          <a
-            href="https://akash.network"
-            target="_blank"
-            rel="noreferrer"
-            className="col-md-4 mb-0 text-muted"
-          >
-            <img src={PoweredByAkash} alt="Powered by Akash" width={200} />
-          </a>
-          <p className="col-md-4 d-flex align-items-center justify-content-center me-lg-auto">
-            <span className="d-none d-sm-inline me-1">
-              Built with 🧡&nbsp; by
-            </span>{" "}
-            <a
-              href="https://stakefrites.co/"
-              className="link-dark text-decoration-none"
-              target="_blank"
-              rel="noreferrer"
-            >
+        <footer className="align-items-center py-3 my-4 border-top row">
+          <div className="col-md-4 mt-2 col-sm-12">
+            <a href="https://akash.network" target="_blank" rel="noreferrer" className="col-md-4 mb-0 text-muted">
+              <img src={PoweredByAkash} alt="Powered by Akash" width={200} />
+            </a>
+          </div>
+          <div className="col-md-7 mt-2 col-sm-12" >
+            <span>
+              Built with 🧡&nbsp;by
+            </span>
+            <a href="https://stakefrites.co/" className="link-dark text-decoration-none" target="_blank" rel="noreferrer">
               Stake Frites (🥩,🍟)&nbsp;
             </a>
-            and&nbsp;
-            <a
-              className="link-dark text-decoration-none"
-              href="https://ecostake.com"
-              target="_blank"
-              rel="noreferrer"
-            >
-              {" "}
-              ECO Stake 🌱
-            </a>
-          </p>
-          <div className="col-md-3" align="right">
-            <a
-              href="https://twitter.com/stakefrites_"
-              alt="Twitter"
-              target="_blank"
-              rel="noreferrer"
-              className="link-dark text-decoration-none"
-            >
+            <span>and&nbsp;</span>
+            <a className="link-dark text-decoration-none" href="https://ecostake.com" target="_blank" rel="noreferrer">ECO Stake 🌱</a>
+          </div>
+          <div className="col-md-1 mt-2 col-sm-12">
+            <a href="https://twitter.com/stakefrites_" alt="Twitter" target="_blank" rel="noreferrer" className="link-dark text-decoration-none">
               <Twitter color="black" size={24} />
             </a>
-            <a
-              href="https://github.com/stakefrites"
-              alt="Github"
-              target="_blank"
-              rel="noreferrer"
-              style={{ marginLeft: "10px" }}
-              className="link-dark text-decoration-none"
-            >
+            <a href="https://github.com/stakefrites" alt="Github" target="_blank" rel="noreferrer" style={{ marginLeft: "10px" }} className="link-dark text-decoration-none">
               <Github color="black" size={24} />
             </a>
           </div>
