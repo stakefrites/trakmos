@@ -91,6 +91,7 @@ function SomeTracker(props) {
 
   function hardRefresh() {
     localStorage.removeItem(balances);
+    setIsLoaded(false);
     refresh(true);
   }
 
