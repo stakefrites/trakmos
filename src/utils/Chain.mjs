@@ -25,6 +25,15 @@ const Chain = async (data) => {
     },
   };
 
+  console.log(
+    "netowkr.json",
+    data,
+    "registry",
+    chainData,
+    "newchain data",
+    newChainData
+  );
+
   const getChainInfo = () => {
     return {
       prettyName: data.prettyName || chainData.pretty_name,

@@ -65,5 +65,84 @@
     ],
     "gasPrice": "0.02udvpn",
     "authzSupport": false
+  },
+  {
+    "name": "persistence",
+    "restUrl": [
+      "https://rest.cosmos.directory/persistence",
+      "https://rest.core.persistence.one"
+    ],
+    "rpcUrl": [
+      "https://rpc.cosmos.directory/persistence",
+      "https://rpc.core.persistence.one"
+    ],
+    "authzSupport": true
+  },
+  {
+    "name": "bitsong",
+    "restUrl": [
+      "https://rest.cosmos.directory/bitsong",
+      "https://lcd-bitsong.itastakers.com"
+    ],
+    "rpcUrl": [
+      "https://rpc.cosmos.directory/bitsong",
+      "https://rpc-bitsong.itastakers.com"
+    ],
+    "authzSupport": true
+  },
+  {
+    "name": "stargaze",
+    "restUrl": [
+      "https://rest.cosmos.directory/stargaze",
+      "https://rest.stargaze-apis.com",
+      "https://api.stargaze.ezstaking.io"
+    ],
+    "rpcUrl": [
+      "https://rpc.cosmos.directory/stargaze",
+      "https://rpc.stargaze-apis.com",
+      "https://rpc.stargaze.ezstaking.io"
+    ],
+    "authzSupport": true
+  },
+  {
+    "name": "sifchain",
+    "restUrl": [
+      "https://rest.cosmos.directory/sifchain",
+      "https://api.sifchain.finance"
+    ],
+    "rpcUrl": [
+      "https://rpc.cosmos.directory/sifchain",
+      "https://rpc.sifchain.finance"
+    ],
+    "authzSupport": false
+  },
+  {
+    "name": "cryptoorgchain",
+    "restUrl": [
+      "https://rest.cosmos.directory/cryptoorgchain",
+      "https://lcd-crypto-org.keplr.app/"
+    ],
+    "rpcUrl": [
+      "https://rpc.cosmos.directory/cryptoorgchain",
+      "https://mainnet.crypto.org",
+      "https://rpc-crypto-org.keplr.app"
+    ],
+    "gasPrice": "0.025basecro",
+    "authzSupport": true
+  },
+  {
+    "name": "juno",
+    "restUrl": [
+      "https://rest.cosmos.directory/juno",
+      "https://lcd-juno.itastakers.com"
+    ],
+    "rpcUrl": [
+      "https://rpc.cosmos.directory/juno",
+      "https://rpc.juno.omniflix.co",
+      "https://rpc-juno.itastakers.com"
+    ],
+    "gasPrice": "0.0025ujuno",
+    "testAddress": "juno1yxsmtnxdt6gxnaqrg0j0nudg7et2gqcz8yyl52",
+    "authzSupport": true
   }
 ]

@@ -125,12 +125,12 @@ class App extends React.Component {
         error: false,
       });
       this.getBalance();
-      this.getPortfolio(true);
+      this.getPortfolio();
     }
   }
 
   getBalancesCache(expireCache) {
-    const cache = localStorage.getItem("balances");
+    const cache = localStorage.getItem(this.state.address);
 
     if (!cache) return;
 
@@ -167,6 +167,7 @@ class App extends React.Component {
     const totalReducer = (acc, item) => {
       return acc + parseInt(item.value);
     };
+    this.setState({ isLoaded: false });
 
     if (!this.getBalancesCache(true) || hardRefresh) {
       console.log(this.props.networks);
@@ -177,7 +178,7 @@ class App extends React.Component {
         .then((data) => {
           const totalValue = data.reduce(totalReducer, totalacc);
           localStorage.setItem(
-            "balances",
+            this.state.address,
             JSON.stringify({ balances: data, time: +new Date() })
           );
           this.setState({ balances: data, totalValue, isLoaded: true });

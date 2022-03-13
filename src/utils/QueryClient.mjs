@@ -224,7 +224,14 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       const [chainName, chainConfig] = chainInst;
       const chainIml = await Chain(chainConfig);
       const rpcUrls = chainIml.chainData.apis.rpc.map((url) => url.address);
-      console.log("All urls ?", rpcUrls);
+      const { decimals } = chainIml;
+      console.log(
+        "All urls ?",
+        rpcUrls,
+        chainIml,
+        decimals,
+        Math.pow(10, decimals)
+      );
       const rpcUrl = await findAvailableUrl(
         Array.isArray(rpcUrls) ? rpcUrls : [rpcUrls],
         "rpc"
@@ -273,10 +280,14 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       const liquidBal = liquid.find((val) =>
         val.denom == chainIml.denom ? true : false
       );
-      const rewards = totalTokensRewards / 1000000000000000000000000;
-      const stakedBalance = (totalTokensStaked / 1000000).toFixed(2);
+      const rewards = totalTokensRewards / Math.pow(10, decimals + 18);
+      console.log(rewards, Math.pow(10, decimals + 18), totalTokensRewards);
+
+      const stakedBalance = (
+        totalTokensStaked / Math.pow(10, decimals)
+      ).toFixed(2);
       const liquidBalance = liquidBal
-        ? (parseFloat(liquidBal.amount) / 1000000).toFixed(2)
+        ? (parseFloat(liquidBal.amount) / Math.pow(10, decimals)).toFixed(2)
         : 0;
       const total =
         rewards + parseFloat(stakedBalance) + parseFloat(liquidBalance);
