@@ -4,8 +4,6 @@ import Table from "react-bootstrap/Table";
 import currency from "currency.js";
 
 const Intake = (props) => {
-  console.log(props);
-  console.log(currency(12).format());
   return (
     <>
       <Container fluid>

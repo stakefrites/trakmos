@@ -192,7 +192,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     const path = type === "rest" ? "/blocks/latest" : "/block";
     return findAsync(urls, (url) => {
       return axios
-        .get(url + path, { timeout: 2000 })
+        .get(url + path, { timeout: 4000 })
         .then((res) => res.data)
         .then((data) => {
           if (type === "rpc") data = data.result;
@@ -221,6 +221,13 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     for (let chainInst of chains) {
       const [chainName, chainConfig] = chainInst;
       const chainIml = await Chain(chainConfig);
+      console.log(chainIml.chainData.apis.rpc);
+      console.log(
+        await findAvailableUrl(
+          chainIml.chainData.apis.rpc.map((url) => url.address),
+          "rpc"
+        )
+      );
       const price = parseFloat(await getPrice(chainIml.coinGeckoId));
 
       const { rpcUrl } = chainConfig;
