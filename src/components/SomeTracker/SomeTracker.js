@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import Intake from "./Intake";
 import { Spinner } from "react-bootstrap";
 
 const SomeTracker = (props) => {
@@ -31,7 +31,7 @@ const SomeTracker = (props) => {
     );
   }
   if (error) {
-    return <p>Loading failed</p>;
+    return <Intake />;
   }
   return <div className="mb-5">ALLO</div>;
 };
