@@ -42,6 +42,7 @@ const Intake = (props) => {
                     <td>{bal.lp}</td>
                     <td>{bal.rewards}</td>
                     <td>{total}</td>
+                    <td>1 000 000</td>
                   </tr>
                 );
               })}
