@@ -6,6 +6,7 @@ const SomeTracker = (props) => {
   const [interval, setInterval] = useState();
   const [setIsLoaded, isLoaded] = useState(false);
   const [setError, error] = useState();
+  console.log(props.queryClient.address);
   useEffect(() => {
     // Your code here
     // Add a function that should get data onLoad
@@ -31,9 +32,9 @@ const SomeTracker = (props) => {
     );
   }
   if (error) {
-    return <Intake />;
+    return <Intake {...props} />;
   }
-  return <Intake></Intake>;
+  return <Intake {...props}></Intake>;
 };
 
 export default SomeTracker;

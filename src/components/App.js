@@ -367,7 +367,7 @@ class App extends React.Component {
             ))}
           {this.state.address && (
             <>
-              <SomeTracker />
+              <SomeTracker queryClient={this.state.queryClient} />
             </>
           )}
           <hr />
