@@ -9,7 +9,9 @@ import {
   setupMintExtension,
   setupGovExtension,
 } from "@cosmjs/stargate";
+
 import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
+import { Bech32 } from "@cosmjs/encoding";
 
 const QueryClient = async (chainId, rpcUrls, restUrls) => {
   const rpcUrl = await findAvailableUrl(
@@ -26,7 +28,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
    *
    * @returns QueryClient with necessary extensions
    */
-  const makeClient = async () => {
+  const makeClient = async (rpcUrl) => {
     const tmClient = await Tendermint34Client.connect(rpcUrl);
     return CosmjsQueryClient.withExtensions(
       tmClient,
@@ -201,9 +203,50 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     });
   }
 
-  const address = async () => {
-    const client = await makeClient();
-    console.log(client);
+  const getPortfolio = async (a, chains) => {
+    const bech = Bech32.decode(a);
+    const portfolio = [];
+    for (chain of chains) {
+      console.log("chain", chain);
+      const [chainName, chainConfig] = chain;
+      console.log("chainName", chainName, chainConfig);
+
+      const { rpcUrl, testAddress } = chainConfig;
+      console.log(rpcUrls);
+      let rpc;
+      if (typeof rpcUrl == String) {
+        console.log("Is a string");
+        rpc = rpcUrl;
+      } else {
+        console.log("Is an array", rpcUrls);
+        rpc = rpcUrl[0];
+        console.log("RPC from Array", rpc);
+      }
+      console.log(rpc);
+      const client = await makeClient(rpc);
+      const { prefix } = Bech32.decode(testAddress);
+      const chainAddress = Bech32.encode(prefix, bech.data);
+      console.log(chainAddress);
+      const rewards = await client.distribution.delegationTotalRewards(
+        chainAddress
+      );
+      const liquid = await client.bank.allBalances(chainAddress);
+      const staked = await client.staking.delegatorDelegations(chainAddress);
+      const data = {
+        name: chain.chain_name,
+        rewards: 1,
+        rewardsRaw: rewards,
+        staked: 1,
+        stakedRaw: staked,
+        liquidRaw: liquid,
+        liquid: 1,
+        chainAddress,
+      };
+      portfolio.push(data);
+      console.log(chainAddress, data);
+    }
+    console.log("Portfolio", portfolio);
+    return portfolio;
   };
 
   return {
@@ -218,7 +261,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     getDelegations,
     getRewards,
     getGrants,
-    address,
+    getPortfolio,
   };
 };
 

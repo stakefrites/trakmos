@@ -311,7 +311,12 @@ class App extends React.Component {
             ))}
           {this.state.address && (
             <>
-              <SomeTracker address={this.state.address} networks={this.props.networks} queryClient={this.state.queryClient} />
+              <SomeTracker
+                address={this.state.address}
+                networks={this.props.networks}
+                network={this.props.netork}
+                queryClient={this.state.queryClient}
+              />
             </>
           )}
         </div>
