@@ -9,7 +9,9 @@ import {
   setupMintExtension,
   setupGovExtension,
 } from "@cosmjs/stargate";
+
 import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
+import { Bech32 } from "@cosmjs/encoding";
 
 const QueryClient = async (chainId, rpcUrls, restUrls) => {
   const rpcUrl = await findAvailableUrl(
@@ -26,7 +28,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
    *
    * @returns QueryClient with necessary extensions
    */
-  const makeClient = async () => {
+  const makeClient = async (rpcUrl) => {
     const tmClient = await Tendermint34Client.connect(rpcUrl);
     return CosmjsQueryClient.withExtensions(
       tmClient,
@@ -201,9 +203,25 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     });
   }
 
-  const address = async () => {
-    const client = await makeClient();
-    console.log(client);
+  const address = async (a, chains) => {
+    const bech = Bech32.decode(a);
+    const addresses = [];
+    for (chain of chains) {
+      const client = await makeClient(chain.rpcUrl);
+      const chainAddress = Bech32.encode(chain.prefix, bech.data);
+      console.log(chainAddress);
+      const rewards = await client.distribution.delegationTotalRewards(
+        chainAddress
+      );
+      const liquid = await client.bank.allBalances(chainAddress);
+      const staked = await client.staking.delegatorDelegations(chainAddress);
+      const data = { rewards, staked, liquid };
+      console.log(chain.chain, data);
+
+      addresses.push({ chainAddress, data });
+      console.log(chainAddress);
+    }
+    return addresses;
   };
 
   return {
