@@ -26,6 +26,7 @@ function SomeTracker(props) {
     const portfolio = queryClient
       .getPortfolio(address, networks)
       .then((data) => {
+        console.log("f", data);
         f(data);
         setIsLoaded(true);
       });

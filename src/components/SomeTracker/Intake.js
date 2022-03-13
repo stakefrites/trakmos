@@ -15,12 +15,14 @@ const Intake = (props) => {
                 <th>Delegated</th>
                 <th>Rewards</th>
                 <th>Total</th>
-                <th>USD$</th>
               </tr>
             </thead>
             <tbody>
               {props.balances.map((bal) => {
-                const total = parseFloat(bal.staked) + bal.rewards + bal.liquid;
+                const total =
+                  parseFloat(bal.staked) +
+                  parseFloat(bal.rewards) +
+                  parseFloat(bal.liquid);
                 console.log(
                   "this is total",
                   total,
@@ -38,9 +40,8 @@ const Intake = (props) => {
                     </td>
                     <td>{bal.liquid}</td>
                     <td>{bal.staked}</td>
-                    <td>{bal.rewards}</td>
-                    <td>{total}</td>
-                    <td></td>
+                    <td>{bal.rewards.toFixed(2)}</td>
+                    <td>{total.toFixed(2)}</td>
                   </tr>
                 );
               })}

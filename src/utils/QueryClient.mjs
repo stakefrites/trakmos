@@ -254,10 +254,17 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       const data = {
         name: chainName,
         rewards: stakingRewards.amount / 1000000000000000000000000,
-        staked: (stakedBalance.balance.amount / 1000000).toFixed(2),
+        staked: parseFloat((stakedBalance.balance.amount / 1000000).toFixed(2)),
         liquid: (liquidBalance.amount / 1000000).toFixed(2),
+        total:
+          stakingRewards.amount / 1000000000000000000000000 +
+          (parseFloat(stakedBalance.balance.amount) / 1000000).toFixed(2) +
+          (parseFloat(liquidBalance.amount) / 1000000).toFixed(2),
         chainAddress,
       };
+      console.log("rewards", data.rewards);
+      console.log("staked", data.staked);
+      console.log("liquid", data.liquid);
       portfolio.push(data);
       console.log(chainAddress, data);
     }
