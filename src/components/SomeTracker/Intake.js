@@ -3,6 +3,7 @@ import { Container } from "react-bootstrap";
 import Table from "react-bootstrap/Table";
 
 const Intake = (props) => {
+  console.log(props);
   return (
     <>
       <Container fluid>
@@ -20,6 +21,7 @@ const Intake = (props) => {
             </thead>
             <tbody>
               {props.balances.map((bal) => {
+                console.log("rendering", bal);
                 return (
                   <tr key={bal.chainAddress}>
                     <td width="auto">

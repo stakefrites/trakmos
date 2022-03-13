@@ -262,7 +262,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
         rewards + parseFloat(stakedBalance) + parseFloat(liquidBalance);
       console.log(total);
       const data = {
-        name: chainName,
+        name: chainIml.chainData.chain_name,
         rewards,
         staked: parseFloat(stakedBalance),
         liquid: parseFloat(liquidBalance),
@@ -270,7 +270,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
         chainAddress,
         value: total * price,
       };
-      console.log("DATAT", data);
+      console.log("pushing data");
       portfolio.push(data);
     }
     return portfolio;

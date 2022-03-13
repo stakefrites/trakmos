@@ -82,7 +82,7 @@ class App extends React.Component {
   }
 
   showNetworkSelect() {
-    this.setState({ showNetworkSelect: true });
+    this.setState({ showNetworkSelect: false });
   }
 
   async connect() {
@@ -264,7 +264,7 @@ class App extends React.Component {
           <div className="logo d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
             <img src={StakeFriteLogoLong} height="75" alt="Stake Frites" />
           </div>
-          <div className="invisible d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
+          <div className="d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
             <NetworkSelect
               show={this.state.showNetworkSelect}
               onHide={() => {
@@ -310,7 +310,7 @@ class App extends React.Component {
               <SomeTracker
                 address={this.state.address}
                 networks={this.props.networks}
-                network={this.props.netork}
+                network={this.props.network}
                 queryClient={this.state.queryClient}
               />
             </>

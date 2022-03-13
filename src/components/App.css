@@ -1,8 +1,8 @@
-header a.moniker{
+header a.moniker {
   margin-left: 15px;
 }
 
-.clipboard.copied{
+.clipboard.copied {
   text-decoration: underline;
 }
 
@@ -26,5 +26,3 @@ header a.moniker{
   line-height: 70px;
   font-size: 1.3rem;
 }
-
-.invisible {display: none;}
