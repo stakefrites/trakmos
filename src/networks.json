@@ -6,7 +6,7 @@
       "https://lcd-osmosis.blockapsis.com"
     ],
     "rpcUrl": [
-      "https://rpc-osmosis.blockapsis.com"
+      "https://rpc-osmosis.blockapsis.com",
     ],
     "gasPrice": "0uosmo",
     "testAddress": "osmo1yxsmtnxdt6gxnaqrg0j0nudg7et2gqczed559y",

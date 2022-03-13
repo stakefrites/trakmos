@@ -224,6 +224,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       const [chainName, chainConfig] = chainInst;
       const chainIml = await Chain(chainConfig);
       const rpcUrls = chainIml.chainData.apis.rpc.map((url) => url.address);
+      console.log("All urls ?", rpcUrls);
       const rpcUrl = await findAvailableUrl(
         Array.isArray(rpcUrls) ? rpcUrls : [rpcUrls],
         "rpc"
