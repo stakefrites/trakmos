@@ -203,9 +203,9 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     });
   }
 
-  const address = async (a, chains) => {
+  const getPortfolio = async (a, chains) => {
     const bech = Bech32.decode(a);
-    const addresses = [];
+    const portfolio = {};
     for (chain of chains) {
       const client = await makeClient(chain.rpcUrl);
       const chainAddress = Bech32.encode(chain.prefix, bech.data);
@@ -218,10 +218,11 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       const data = { rewards, staked, liquid };
       console.log(chain.chain, data);
 
-      addresses.push({ chainAddress, data });
+      portfolio[chainAddress] = data;
       console.log(chainAddress);
     }
-    return addresses;
+    console.log(portfolio);
+    return portfolio;
   };
 
   return {
@@ -236,7 +237,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     getDelegations,
     getRewards,
     getGrants,
-    address,
+    getPortfolio,
   };
 };
 
