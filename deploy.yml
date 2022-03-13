@@ -3,12 +3,11 @@ version: "2.0"
 
 services:
   node:
-    image: ghcr.io/eco-stake/restake:latest
+    image: ghcr.io/stake-frites/some-tracker:latest
     expose:
       - port: 80
         accept:
-          - restake.ecostake.com
-          - restake.app
+          - some-tracker.stakefrites.co
         to:
           - global: true
 
@@ -28,7 +27,7 @@ profiles:
         host: akash
       signedBy:
         anyOf:
-          - akash1365yvmc4s7awdyj3n2sav7xfx76adc6dnmlx63
+          - akash1weeu5yuj8n23hd87wsdxqqgfmzzz9zt6zrr52c
       pricing:
         node:
           denom: uakt
