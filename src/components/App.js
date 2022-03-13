@@ -12,7 +12,7 @@ import About from "./About";
 
 import { MsgGrant, MsgRevoke } from "cosmjs-types/cosmos/authz/v1beta1/tx.js";
 
-import { Container, Button, Badge } from "react-bootstrap";
+import { Container, Button, Badge, Form } from "react-bootstrap";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import GitHubButton from "react-github-btn";
 import Logo from "../assets/logo.png";
@@ -335,7 +335,7 @@ class App extends React.Component {
           <div className="logo d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
             <img src={StakeFriteLogoLong} height="75" alt="Stake Frites" />
           </div>
-          <div className="d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
+          <div className="invisible d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
             <NetworkSelect
               show={this.state.showNetworkSelect}
               onHide={() => {
@@ -359,7 +359,6 @@ class App extends React.Component {
           {!this.state.address &&
             (!this.state.keplr ? (
               <>
-                <input type="text" value={this.state.address}></input>
                 <AlertMessage variant="warning" dismissible={false}>
                   Please install the{" "}
                   <a
@@ -372,6 +371,14 @@ class App extends React.Component {
                   using desktop Google Chrome.
                   <br />
                   WalletConnect and mobile support is coming soon.
+                  <hr />
+                  <Form className="manual-address">
+                    <Form.Group className="mb-3" controlId="formBasicEmail">
+                    <Form.Label>Enter any $COSMOS address</Form.Label>
+                    <Form.Control type="text" placeholder="osmo1eh... or cosmos1eh..." />
+                    </Form.Group>
+                    <Button variant="primary" type="submit">Submit</Button>
+                  </Form>
                 </AlertMessage>
               </>
             ) : (
