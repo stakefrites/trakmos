@@ -107,10 +107,10 @@ function NetworkSelect(props) {
       <Button
         onClick={handleOpen}
         variant="link"
-        className="d-flex align-items-center text-dark text-decoration-none border-secondary btn-outline-light"
+        className=" invisible d-flex align-items-center text-dark text-decoration-none border-secondary btn-outline-light"
         role="button"
       >
-        <div className="avatar avatar-sm rounded-circle text-white">
+        <div className=" invisible avatar avatar-sm rounded-circle text-white">
           <img
             alt={props.network.prettyName}
             src={props.network.image}

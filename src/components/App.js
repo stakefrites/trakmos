@@ -84,7 +84,7 @@ class App extends React.Component {
   }
 
   showNetworkSelect() {
-    this.setState({ showNetworkSelect: false });
+    this.setState({ showNetworkSelect: true });
   }
 
   async connect() {
@@ -358,19 +358,22 @@ class App extends React.Component {
           />
           {!this.state.address &&
             (!this.state.keplr ? (
-              <AlertMessage variant="warning" dismissible={false}>
-                Please install the{" "}
-                <a
-                  href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Keplr browser extension
-                </a>{" "}
-                using desktop Google Chrome.
-                <br />
-                WalletConnect and mobile support is coming soon.
-              </AlertMessage>
+              <>
+                <input type="text" value={this.state.address}></input>
+                <AlertMessage variant="warning" dismissible={false}>
+                  Please install the{" "}
+                  <a
+                    href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Keplr browser extension
+                  </a>{" "}
+                  using desktop Google Chrome.
+                  <br />
+                  WalletConnect and mobile support is coming soon.
+                </AlertMessage>
+              </>
             ) : (
               <div className="mb-5 text-center">
                 <Button onClick={this.connect}>Connect Keplr</Button>
