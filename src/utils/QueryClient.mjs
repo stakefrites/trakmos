@@ -218,7 +218,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
   const getPortfolio = async (a, chains) => {
     const bech = Bech32.decode(a);
     const portfolio = [];
-    for (chainInst of chains) {
+    for (let chainInst of chains) {
       console.log("in a loop", chainInst);
       const [chainName, chainConfig] = chainInst;
       const chainIml = await Chain(chainConfig);
