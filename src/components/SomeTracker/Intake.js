@@ -16,6 +16,7 @@ const Intake = (props) => {
                 <th>LP</th>
                 <th>Rewards</th>
                 <th>Total</th>
+                <th>USD$</th>
               </tr>
             </thead>
             <tbody>
@@ -34,6 +35,7 @@ const Intake = (props) => {
                     <td>{bal.lp}</td>
                     <td>{bal.rewards}</td>
                     <td>{bal.liquid + bal.staked + bal.rewards}</td>
+                    <td>1 000 000</td>
                   </tr>
                 );
               })}
