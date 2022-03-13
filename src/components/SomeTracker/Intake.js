@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Spinner } from "react-bootstrap";
 
-const SomeTracker = (props) => {
+const Intake = (props) => {
   
   return <div className="mb-5">ALLO</div>;
 
-export default SomeTracker;
+export default Intake;
