@@ -15,16 +15,14 @@ const Intake = (props) => {
                 <th>Delegated</th>
                 <th>Rewards</th>
                 <th>Total</th>
+                <th>Value (in USD)</th>
               </tr>
             </thead>
             <tbody>
               {props.balances.map((bal) => {
-                const total =
-                  parseFloat(bal.staked) +
-                  parseFloat(bal.rewards) +
-                  parseFloat(bal.liquid);
+                console.log("BAL", bal);
                 return (
-                  <tr key={bal.address}>
+                  <tr key={bal.chainAddress}>
                     <td width="auto">
                       <img
                         src={props.networks[bal.name].image}
@@ -35,7 +33,8 @@ const Intake = (props) => {
                     <td>{bal.liquid}</td>
                     <td>{bal.staked}</td>
                     <td>{bal.rewards.toFixed(2)}</td>
-                    <td>{total.toFixed(2)}</td>
+                    <td>{bal.total.toFixed(2)}</td>
+                    <td>{bal.value.toFixed(2)}</td>
                   </tr>
                 );
               })}

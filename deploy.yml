@@ -37,4 +37,4 @@ deployment:
   node:
     dcloud:
       profile: node
-      count: 3
+      count: 1
