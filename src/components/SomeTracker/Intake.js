@@ -16,6 +16,7 @@ const Intake = (props) => {
                 <th>LP</th>
                 <th>Rewards</th>
                 <th>Total</th>
+                <th>USD$</th>
               </tr>
             </thead>
             <tbody>

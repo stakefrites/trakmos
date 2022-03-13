@@ -26,3 +26,5 @@ header a.moniker{
   line-height: 70px;
   font-size: 1.3rem;
 }
+
+.invisible {display: none;}
