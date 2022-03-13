@@ -5,7 +5,7 @@ import { json } from "stream/consumers";
 
 function SomeTracker(props) {
   const [interval, setInterval] = useState();
-  const [setIsLoaded, isLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState();
   const [balances, setBalances] = useState([{}]);
 
@@ -27,6 +27,7 @@ function SomeTracker(props) {
       .getPortfolio(address, networks)
       .then((data) => {
         f(data);
+        setIsLoaded(true);
       });
   }
   function refreshInterval() {
@@ -54,7 +55,7 @@ function SomeTracker(props) {
       </>
     );
   }
-  return <h1>{JSON.stringify(balances)}</h1>;
+  return <Intake balances={balances} {...props} />;
 }
 
 export default SomeTracker;
