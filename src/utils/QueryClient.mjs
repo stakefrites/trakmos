@@ -251,7 +251,11 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       };
 
       const rewardsReducer = (acc, item) => {
-        return acc + parseInt(item.reward[0].amount);
+        if (item.reward.length == 0) {
+          return 0;
+        } else {
+          return acc + parseInt(item.reward[0].amount);
+        }
       };
 
       const totalTokensStaked =
