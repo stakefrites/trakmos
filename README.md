@@ -1,4 +1,6 @@
-# [REStake](https://restake.app)
+# [SomeTracker](https://restake.app)
+
+[![publish](https://github.com/stakefrites/some-tracker/actions/workflows/publish.yml/badge.svg)](https://github.com/stakefrites/some-tracker/actions/workflows/publish.yml)
 
 REStake allows delegators to grant permission for a validator to compound their rewards, and provides a script validators can run to find their granted delegators and send the compounding transactions automatically.
 
@@ -10,7 +12,7 @@ Try it out at [restake.app](https://restake.app).
 
 ## How it works / Authz
 
-Authz is a new feature for Tendermint chains which lets you grant permission to another wallet to carry out certain transactions for you. These transactions are sent by the grantee on behalf of the granter, meaning the validator will send and pay for the TX, but actions will affect your wallet (such as claiming rewards). 
+Authz is a new feature for Tendermint chains which lets you grant permission to another wallet to carry out certain transactions for you. These transactions are sent by the grantee on behalf of the granter, meaning the validator will send and pay for the TX, but actions will affect your wallet (such as claiming rewards).
 
 REStake specifically lets you grant a validator permission to send `WithdrawDelegatorReward` and `Delegate` transactions for their validator only (note `WithdrawDelegatorReward` is technically not restricted to a single validator). The validator cannot send any other transaction types, and has no other access to your wallet. You authorise this using Keplr as normal.
 
@@ -30,11 +32,11 @@ Becoming an operator is extremely easy. You need to do three things:
 
 Generate a new hot wallet you will use to automatically carry out the staking transactions. The mnemonic will need to be provided to the script so **use a dedicated wallet and only keep enough funds for transaction fees**. The ONLY menmonic required here is for the hot wallet, do not put your validator operator mnemonic anywhere.
 
-You only need a single mnemonic for multiple Cosmos chains, and the script will check each network in the [networks.json](./src/networks.json) file for a matching bot address. 
+You only need a single mnemonic for multiple Cosmos chains, and the script will check each network in the [networks.json](./src/networks.json) file for a matching bot address.
 
 ### Setup the autostaking script and run daily
 
-You can run the autostaking script using `docker-compose` or using `npm` directly. In both cases you will need to provide your mnemonic in a `MNEMONIC` environment variable. 
+You can run the autostaking script using `docker-compose` or using `npm` directly. In both cases you will need to provide your mnemonic in a `MNEMONIC` environment variable.
 
 Instructions are provided for Docker Compose and will be expanded later.
 
@@ -108,7 +110,7 @@ Systemd-timer allow to run a one-off service with specified rules.
 
 ##### Create a systemd unit file:
 
-The unit file describe the application to run.  We define a dependency with the timer with the `Wants` statement.
+The unit file describe the application to run. We define a dependency with the timer with the `Wants` statement.
 
 ```bash
 $ sudo vim /etc/systemd/system/restake.service
@@ -132,7 +134,7 @@ WantedBy=multi-user.target
 
 ##### Create a systemd timer file:
 
-The timer file defines the rules for running the restake service every day. All rules are described in the [systemd documentation](https://www.freedesktop.org/software/systemd/man/systemd.timer.html). 
+The timer file defines the rules for running the restake service every day. All rules are described in the [systemd documentation](https://www.freedesktop.org/software/systemd/man/systemd.timer.html).
 
 ```bash
 $ sudo vim /etc/systemd/system/restake.timer
@@ -161,13 +163,16 @@ $ systemctl start restake.timer
 ##### Check your timer
 
 `$ systemctl status restake.timer`
+
 <pre><font color="#8AE234"><b>●</b></font> restake.timer - Restake bot timer
      Loaded: loaded (/etc/systemd/system/restake.timer; enabled; vendor preset: enabled)
      Active: <font color="#8AE234"><b>active (waiting)</b></font> since Sun 2022-03-06 22:29:48 UTC; 2 days ago
     Trigger: Wed 2022-03-09 21:00:00 UTC; 7h left
    Triggers: ● restake.service
 </pre>
+
 `$ systemctl status restake.service`
+
 <pre>● restake.service - stakebot service with docker compose
      Loaded: loaded (/etc/systemd/system/restake.service; enabled; vendor preset: enabled)
      Active: inactive (dead) since Tue 2022-03-08 21:00:22 UTC; 16h ago
@@ -188,12 +193,8 @@ Create a `src/networks.local.json` file with JSON in the following format:
 {
   "osmosis": {
     "prettyName": "Foobar",
-    "restUrl": [
-      "https://rest.validator.com/osmosis"
-    ],
-    "rpcUrl": [
-      "https://rpc.validator.com/osmosis"
-    ]
+    "restUrl": ["https://rest.validator.com/osmosis"],
+    "rpcUrl": ["https://rpc.validator.com/osmosis"]
   }
 }
 ```
@@ -215,7 +216,7 @@ You now need to update the [networks.json](./src/networks.json) file at `./src/n
 },
 ```
 
-`address` is your validator's address, and `botAddress` is the address from your new hot wallet you generated earlier. `runTime` is the time in UTC that your bot will run (multiple planned in the future). `minimumReward` is the minimum reward to trigger autostaking, otherwise the address be skipped. 
+`address` is your validator's address, and `botAddress` is the address from your new hot wallet you generated earlier. `runTime` is the time in UTC that your bot will run (multiple planned in the future). `minimumReward` is the minimum reward to trigger autostaking, otherwise the address be skipped.
 
 Repeat this config for all networks you want to REStake for.
 
@@ -234,17 +235,12 @@ To add a network to REStake, add the required information to `networks.json` as 
 ```json
 {
   "name": "osmosis",
-  "restUrl": [
-    "https://rest.cosmos.directory/osmosis",
-  ],
-  "rpcUrl": [
-    "https://rpc.cosmos.directory/osmosis",
-  ],
+  "restUrl": ["https://rest.cosmos.directory/osmosis"],
+  "rpcUrl": ["https://rpc.cosmos.directory/osmosis"],
   "gasPrice": "0.025uosmo",
   "testAddress": "osmo1yxsmtnxdt6gxnaqrg0j0nudg7et2gqczed559y",
   "ownerAddress": "osmovaloper1u5v0m74mql5nzfx2yh43s2tke4mvzghr6m2n5t",
-  "operators": [
-  ],
+  "operators": [],
   "authzSupport": true
 }
 ```
@@ -263,9 +259,9 @@ Alternative run from source using `docker-compose up` or `npm start`.
 
 ## Ethos
 
-The REStake UI is both validator and network agnostic. Any validator can be added as an operator and run this tool to provide an auto-compounding service to their delegators, but they can also run their own UI if they choose and adjust the branding to suit themselves. 
+The REStake UI is both validator and network agnostic. Any validator can be added as an operator and run this tool to provide an auto-compounding service to their delegators, but they can also run their own UI if they choose and adjust the branding to suit themselves.
 
-For this to work, we need a common source of chain information, and a common source of 'operator' information. Chain information is sourced from the [Chain Registry](https://github.com/cosmos/chain-registry), via an API provided by [cosmos.directory](https://registry.cosmos.directory). Operator information currently lives in the [networks.json](./src/networks.json) file in this repository. 
+For this to work, we need a common source of chain information, and a common source of 'operator' information. Chain information is sourced from the [Chain Registry](https://github.com/cosmos/chain-registry), via an API provided by [cosmos.directory](https://registry.cosmos.directory). Operator information currently lives in the [networks.json](./src/networks.json) file in this repository.
 
 If you fork this repository to provide your own UI, please keep up to date with the upstream to ensure you have the latest [networks.json](./src/networks.json) to include all operators. Some honesty is needed until we have a more decentralised solution.
 
@@ -276,4 +272,3 @@ The initial version of REStake was built quickly to take advantage of the new au
 ## ECO Stake 🌱
 
 ECO Stake is a climate positive validator, but we care about the Cosmos ecosystem too. We built REStake to make it easy for all validators to run an autocompounder with Authz, and it's one of many projects we work on in the ecosystem. [Delegate with us](https://ecostake.com) to support more projects like this.
-

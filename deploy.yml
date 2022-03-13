@@ -3,7 +3,7 @@ version: "2.0"
 
 services:
   node:
-    image: ghcr.io/stake-frites/some-tracker:latest
+    image: ghcr.io/stakefrites/some-tracker:latest
     expose:
       - port: 80
         accept:
@@ -27,7 +27,7 @@ profiles:
         host: akash
       signedBy:
         anyOf:
-          - akash1weeu5yuj8n23hd87wsdxqqgfmzzz9zt6zrr52c
+          - akash1365yvmc4s7awdyj3n2sav7xfx76adc6dnmlx63
       pricing:
         node:
           denom: uakt
