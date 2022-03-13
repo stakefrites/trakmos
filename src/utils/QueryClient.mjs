@@ -240,9 +240,24 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       );
       const liquid = await client.bank.allBalances(chainAddress);
       const staked = await client.staking.delegatorDelegations(chainAddress);
+
+      const stakingAcc = 0;
+
+      const reducer = (acc, item) => {
+        console.log("reducing", acc, item);
+        return acc + parseInt(item.balance.amount);
+      };
+
+      const totalTokensStaked = staked.delegationResponses.reduce(
+        reducer,
+        stakingAcc
+      );
+      console.log(chainAddress, totalTokensStaked);
+
       const stakingRewards = rewardsReq.total.find((val) =>
         val.denom == chainIml.denom ? true : false
       );
+
       const liquidBal = liquid.find((val) =>
         val.denom == chainIml.denom ? true : false
       );
@@ -252,15 +267,14 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       const rewards = stakingRewards
         ? stakingRewards.amount / 1000000000000000000000000
         : 0;
-      const stakedBalance = stakedBal
-        ? (parseInt(stakedBal.balance.amount) / 1000000).toFixed(2)
-        : stakedBal;
+      const stakedBalance = (totalTokensStaked / 1000000).toFixed(2);
       const liquidBalance = liquidBal
         ? (parseFloat(liquidBal.amount) / 1000000).toFixed(2)
         : 0;
       const total =
         rewards + parseFloat(stakedBalance) + parseFloat(liquidBalance);
       console.log(total);
+      console.log("staked Bal", staked, stakedBal, stakedBalance);
       const data = {
         name: chainIml.chainData.chain_name,
         rewards,
@@ -270,7 +284,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
         chainAddress,
         value: total * price,
       };
-      console.log("pushing data");
+      console.log("pushing data", data);
       portfolio.push(data);
     }
     return portfolio;
