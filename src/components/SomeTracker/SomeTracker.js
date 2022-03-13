@@ -6,6 +6,7 @@ const SomeTracker = (props) => {
   const [interval, setInterval] = useState();
   const [setIsLoaded, isLoaded] = useState(false);
   const [setError, error] = useState();
+  const [balances, setBalances] = useState();
   console.log(props.queryClient.address);
   useEffect(() => {
     // Your code here
@@ -34,7 +35,7 @@ const SomeTracker = (props) => {
   if (error) {
     return <Intake {...props} />;
   }
-  return <Intake {...props}></Intake>;
+  return <Intake balances={"ok"} {...props}></Intake>;
 };
 
 export default SomeTracker;

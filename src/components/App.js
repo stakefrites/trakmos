@@ -20,6 +20,9 @@ import Logo2x from "../assets/logo@2x.png";
 import Logo3x from "../assets/logo@3x.png";
 
 import PoweredByAkash from "../assets/powered-by-akash.svg";
+import { Twitter, Github } from 'react-bootstrap-icons';
+import StakeFriteLogo from "../assets/Sigle_Stake_house@2x.png"
+import StakeFriteLogoLong from "../assets/Logo_Stake_house_VF_150.png"
 
 class App extends React.Component {
   constructor(props) {
@@ -259,60 +262,12 @@ class App extends React.Component {
       <Container>
         <header className="d-flex flex-wrap justify-content-between py-3 mb-4 border-bottom">
           <div className="logo d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
-            <span
-              onClick={() => this.setState({ showAbout: true })}
-              role="button"
-              className="text-dark text-decoration-none"
-            >
               <img
-                src={Logo}
-                srcSet={`${Logo2x} 2x, ${Logo3x} 3x`}
-                alt="REStake"
+                src={StakeFriteLogoLong}
+                height="75"
+                alt="Stake Frites"
               />
-            </span>
           </div>
-          {this.state.address && (
-            <ul className="nav nav-pills justify-content-end">
-              <li className="nav-item d-none d-xl-block">
-                <CopyToClipboard
-                  text={this.state.address}
-                  onCopy={() => this.setCopied()}
-                >
-                  <span role="button">
-                    <span
-                      className={
-                        "nav-link disabled clipboard" +
-                        (this.state.copied ? " copied" : "")
-                      }
-                    >
-                      {this.state.address}
-                    </span>
-                  </span>
-                </CopyToClipboard>
-              </li>
-              <li className="nav-item d-none d-md-block">
-                <span className="nav-link">
-                  <Badge>
-                    <Coins
-                      coins={this.state.balance}
-                      decimals={this.props.network.decimals}
-                    />
-                  </Badge>
-                </span>
-              </li>
-              {false && (
-                <li className="nav-item">
-                  <Button
-                    onClick={() => this.disconnect()}
-                    className="nav-link btn-link"
-                    aria-current="page"
-                  >
-                    Disconnect
-                  </Button>
-                </li>
-              )}
-            </ul>
-          )}
           <div className="d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
             <NetworkSelect
               show={this.state.showNetworkSelect}
@@ -329,17 +284,6 @@ class App extends React.Component {
           </div>
         </header>
         <div className="mb-5">
-          <p className="lead fs-3 text-center mt-5 mb-5">
-            REStake allows validators to <strong>auto-compound</strong> your{" "}
-            <strong
-              onClick={this.showNetworkSelect}
-              className="text-decoration-underline"
-              role="button"
-            >
-              {this.props.network.prettyName}
-            </strong>{" "}
-            staking rewards for you
-          </p>
           <AlertMessage
             message={this.state.error}
             variant="danger"
@@ -367,71 +311,25 @@ class App extends React.Component {
             ))}
           {this.state.address && (
             <>
-              <SomeTracker queryClient={this.state.queryClient} />
+              <SomeTracker address={this.state.address} networks={this.props.networks} queryClient={this.state.queryClient} />
             </>
           )}
-          <hr />
-          <p className="mt-5 text-center">
-            Enabling REStake will authorize the validator to send{" "}
-            <em>WithdrawDelegatorReward</em> and <em>Delegate</em> transactions
-            on your behalf for 1 year using{" "}
-            <a
-              href="https://docs.cosmos.network/master/modules/authz/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Authz
-            </a>
-            .<br />
-            They will only be authorised to delegate to their own validator. You
-            can revoke the authorization at any time and everything is open
-            source.
-          </p>
-          <p className="text-center mb-4">
-            <strong>
-              The validators will pay the transaction fees for you.
-            </strong>
-          </p>
-          <p className="text-center mb-5">
-            <Button
-              onClick={() => this.setState({ showAbout: true })}
-              variant="outline-secondary"
-            >
-              More info
-            </Button>
-          </p>
         </div>
         <footer className="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-          <a
-            href="https://akash.network"
-            target="_blank"
-            rel="noreferrer"
-            className="col-md-4 mb-0 text-muted"
-          >
+          <a href="https://akash.network" target="_blank" rel="noreferrer" className="col-md-4 mb-0 text-muted">
             <img src={PoweredByAkash} alt="Powered by Akash" width={200} />
           </a>
-
-          <a
-            href="https://ecostake.com"
-            target="_blank"
-            rel="noreferrer"
-            className="col-md-4 d-flex align-items-center justify-content-center me-lg-auto link-dark text-decoration-none"
-          >
-            <span className="d-none d-sm-inline me-1">Built with 💚&nbsp;</span>{" "}
-            by ECO Stake 🌱
+          <a href="https://stakefrites.co/" target="_blank" rel="noreferrer" className="col-md-4 d-flex align-items-center justify-content-center me-lg-auto link-dark text-decoration-none">
+            <span className="d-none d-sm-inline me-1">Built with 💚&nbsp;</span> by Stake Frites (🥩,🍟) 
           </a>
-
-          <p className="col-md-4 mb-0 text-muted text-end justify-content-end d-none d-lg-flex">
-            <GitHubButton
-              href="https://github.com/eco-stake/restake"
-              data-icon="octicon-star"
-              data-size="large"
-              data-show-count="true"
-              aria-label="Star eco-stake/restake on GitHub"
-            >
-              Star
-            </GitHubButton>
-          </p>
+          <div class="col-md-3 d-flex align-items-center justify-content-center me-lg-auto">
+            <a href="https://twitter.com/stakefrites_" alt="Twitter" target="_blank" rel="noreferrer" className="link-dark text-decoration-none">
+              <Twitter color="black" size={24} />
+            </a>
+            <a href="https://github.com/stakefrites" alt="Github" target="_blank" rel="noreferrer" className="link-dark text-decoration-none">
+              <Github color="black" size={24} />
+            </a>
+          </div>
         </footer>
         <About
           show={this.state.showAbout}
