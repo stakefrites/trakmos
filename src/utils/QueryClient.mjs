@@ -205,23 +205,47 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
 
   const getPortfolio = async (a, chains) => {
     const bech = Bech32.decode(a);
-    const portfolio = {};
+    const portfolio = [];
     for (chain of chains) {
-      const client = await makeClient(chain.rpcUrl);
-      const chainAddress = Bech32.encode(chain.prefix, bech.data);
+      console.log("chain", chain);
+      const [chainName, chainConfig] = chain;
+      console.log("chainName", chainName, chainConfig);
+
+      const { rpcUrl, testAddress } = chainConfig;
+      console.log(rpcUrls);
+      let rpc;
+      if (typeof rpcUrl == String) {
+        console.log("Is a string");
+        rpc = rpcUrl;
+      } else {
+        console.log("Is an array", rpcUrls);
+        rpc = rpcUrl[0];
+        console.log("RPC from Array", rpc);
+      }
+      console.log(rpc);
+      const client = await makeClient(rpc);
+      const { prefix } = Bech32.decode(testAddress);
+      const chainAddress = Bech32.encode(prefix, bech.data);
       console.log(chainAddress);
       const rewards = await client.distribution.delegationTotalRewards(
         chainAddress
       );
       const liquid = await client.bank.allBalances(chainAddress);
       const staked = await client.staking.delegatorDelegations(chainAddress);
-      const data = { rewards, staked, liquid };
-      console.log(chain.chain, data);
-
-      portfolio[chainAddress] = data;
-      console.log(chainAddress);
+      const data = {
+        name: chain.chain_name,
+        rewards: 1,
+        rewardsRaw: rewards,
+        staked: 1,
+        stakedRaw: staked,
+        liquidRaw: liquid,
+        liquid: 1,
+        chainAddress,
+      };
+      portfolio.push(data);
+      console.log(chainAddress, data);
     }
-    console.log(portfolio);
+    console.log("Portfolio", portfolio);
     return portfolio;
   };
 

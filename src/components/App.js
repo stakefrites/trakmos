@@ -369,6 +369,8 @@ class App extends React.Component {
             <>
               <SomeTracker
                 address={this.state.address}
+                networks={this.props.networks}
+                network={this.props.netork}
                 queryClient={this.state.queryClient}
               />
             </>
