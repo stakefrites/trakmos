@@ -325,16 +325,30 @@ class App extends React.Component {
           >
             <img src={PoweredByAkash} alt="Powered by Akash" width={200} />
           </a>
-          <a
-            href="https://stakefrites.co/"
-            target="_blank"
-            rel="noreferrer"
-            className="col-md-4 d-flex align-items-center justify-content-center me-lg-auto link-dark text-decoration-none"
-          >
-            <span className="d-none d-sm-inline me-1">Built with 💚&nbsp;</span>{" "}
-            by Stake Frites (🥩,🍟)
-          </a>
-          <div className="col-md-3 d-flex align-items-center justify-content-center me-lg-auto">
+          <p className="col-md-4 d-flex align-items-center justify-content-center me-lg-auto">
+            <span className="d-none d-sm-inline me-1">
+              Built with 🧡&nbsp; by
+            </span>{" "}
+            <a
+              href="https://stakefrites.co/"
+              class="link-dark text-decoration-none"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Stake Frites (🥩,🍟)&nbsp;
+            </a>
+            and&nbsp;
+            <a
+              class="link-dark text-decoration-none"
+              href="https://ecostake.com"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {" "}
+              ECO Stake 🌱
+            </a>
+          </p>
+          <div className="col-md-3" align="right">
             <a
               href="https://twitter.com/stakefrites_"
               alt="Twitter"
@@ -349,6 +363,7 @@ class App extends React.Component {
               alt="Github"
               target="_blank"
               rel="noreferrer"
+              style={{ marginLeft: "10px" }}
               className="link-dark text-decoration-none"
             >
               <Github color="black" size={24} />
