@@ -5,11 +5,12 @@ import { json } from "stream/consumers";
 
 function SomeTracker(props) {
   const [interval, setInterval] = useState();
-  const [setIsLoaded, isLoaded] = useState(false);
-  const [setError, error] = useState();
-  const [balances, setBalances] = useState();
-  //console.log(props.queryClient.address);
-  useEffect(() => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [error, setError] = useState();
+  const [balances, setBalances] = useState([{}]);
+
+  const { queryClient, address } = props;
+  useEffect(async () => {
     // Your code here
     // Add a function that should get data onLoad
     //this.getDelegations();
@@ -26,6 +27,7 @@ function SomeTracker(props) {
       .getPortfolio(address, networks)
       .then((data) => {
         f(data);
+        setIsLoaded(true);
       });
   }
   function refreshInterval() {
@@ -53,7 +55,7 @@ function SomeTracker(props) {
       </>
     );
   }
-  return <h1>{JSON.stringify(balances)}</h1>;
+  return <Intake balances={balances} {...props} />;
 }
 
 export default SomeTracker;

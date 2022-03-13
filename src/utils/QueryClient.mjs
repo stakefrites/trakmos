@@ -233,11 +233,11 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       const liquid = await client.bank.allBalances(chainAddress);
       const staked = await client.staking.delegatorDelegations(chainAddress);
       const data = {
-        name: chain.chain_name,
+        name: chainName,
         rewards: 1,
-        rewardsRaw: rewards,
+        rewardsRaw: rewards.rewards,
         staked: 1,
-        stakedRaw: staked,
+        stakedRaw: staked.delegationResponses,
         liquidRaw: liquid,
         liquid: 1,
         chainAddress,
