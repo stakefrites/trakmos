@@ -20,7 +20,6 @@ const Intake = (props) => {
             </thead>
             <tbody>
               {props.balances.map((bal) => {
-                console.log("BAL", bal);
                 return (
                   <tr key={bal.chainAddress}>
                     <td width="auto">

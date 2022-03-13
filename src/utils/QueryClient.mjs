@@ -216,11 +216,11 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
   };
 
   const getPortfolio = async (a, chains) => {
-    console.log("chains", chains);
     const bech = Bech32.decode(a);
     const portfolio = [];
-    for (chain of chains) {
-      const [chainName, chainConfig] = chain;
+    for (chainInst of chains) {
+      console.log("in a loop", chainInst);
+      const [chainName, chainConfig] = chainInst;
       const chainIml = await Chain(chainConfig);
       console.log("chain IML", chainIml);
       const price = parseFloat(await getPrice(chainIml.coinGeckoId));
