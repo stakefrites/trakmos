@@ -23,12 +23,6 @@ const Intake = (props) => {
                   parseFloat(bal.staked) +
                   parseFloat(bal.rewards) +
                   parseFloat(bal.liquid);
-                console.log(
-                  "this is total",
-                  total,
-                  parseFloat(bal.staked),
-                  bal.rewards
-                );
                 return (
                   <tr key={bal.address}>
                     <td width="auto">

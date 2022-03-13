@@ -208,28 +208,19 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     const bech = Bech32.decode(a);
     const portfolio = [];
     for (chain of chains) {
-      console.log("chain", chain);
       const [chainName, chainConfig] = chain;
       const chainIml = await Chain(chainConfig);
-      console.log("chainIMPL", chainIml);
-      console.log("chainName", chainName, chainConfig);
 
       const { rpcUrl } = chainConfig;
-      console.log(rpcUrls);
       let rpc;
       if (typeof rpcUrl == String) {
-        console.log("Is a string");
         rpc = rpcUrl;
       } else {
-        console.log("Is an array", rpcUrls);
         rpc = rpcUrl[0];
-        console.log("RPC from Array", rpc);
       }
-      console.log(rpc);
       const client = await makeClient(rpc);
       const { prefix } = chainIml;
       const chainAddress = Bech32.encode(prefix, bech.data);
-      console.log(chainAddress);
       const rewards = await client.distribution.delegationTotalRewards(
         chainAddress
       );
@@ -237,10 +228,8 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       const staked = await client.staking.delegatorDelegations(chainAddress);
       let totalStaked = 0;
       for (stake of staked.delegationResponses) {
-        console.log("loop stake:", stake, stake.balance.amount);
         totalStaked += stake.balance.amount;
       }
-      console.log("staked", JSON.stringify(staked), totalStaked);
       const stakingRewards = rewards.total.find((val) =>
         val.denom == chainIml.denom ? true : false
       );
@@ -250,7 +239,6 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       const stakedBalance = staked.delegationResponses.find((val) =>
         val.balance.denom == chainIml.denom ? true : false
       );
-      console.log("chainStaked", stakingRewards);
       const data = {
         name: chainName,
         rewards: stakingRewards.amount / 1000000000000000000000000,
@@ -262,13 +250,8 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
           (parseFloat(liquidBalance.amount) / 1000000).toFixed(2),
         chainAddress,
       };
-      console.log("rewards", data.rewards);
-      console.log("staked", data.staked);
-      console.log("liquid", data.liquid);
       portfolio.push(data);
-      console.log(chainAddress, data);
     }
-    console.log("Portfolio", portfolio);
     return portfolio;
   };
 
