@@ -18,7 +18,7 @@ const SomeTracker = (props) => {
       //Add a function that should be reloaded (Addresses)
       //this.getDelegations(true);
     }, 30_000);
-    setIsLoaded(true);
+    //setIsLoaded(true);
     setInterval(interval);
   }
   if (!isLoaded) {
@@ -33,7 +33,7 @@ const SomeTracker = (props) => {
   if (error) {
     return <Intake />;
   }
-  return <div className="mb-5">ALLO</div>;
+  return <Intake></Intake>;
 };
 
 export default SomeTracker;
