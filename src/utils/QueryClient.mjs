@@ -210,6 +210,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     for (chain of chains) {
       const [chainName, chainConfig] = chain;
       const chainIml = await Chain(chainConfig);
+      console.log("chain IML", chainIml);
 
       const { rpcUrl } = chainConfig;
       let rpc;
@@ -239,15 +240,30 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       const stakedBalance = staked.delegationResponses.find((val) =>
         val.balance.denom == chainIml.denom ? true : false
       );
+      console.log(
+        "s rewards",
+        stakingRewards,
+        rewards,
+        liquid,
+        staked,
+        totalStaked
+      );
       const data = {
         name: chainName,
-        rewards: stakingRewards.amount / 1000000000000000000000000,
-        staked: parseFloat((stakedBalance.balance.amount / 1000000).toFixed(2)),
-        liquid: (liquidBalance.amount / 1000000).toFixed(2),
-        total:
-          stakingRewards.amount / 1000000000000000000000000 +
-          (parseFloat(stakedBalance.balance.amount) / 1000000).toFixed(2) +
-          (parseFloat(liquidBalance.amount) / 1000000).toFixed(2),
+        rewards: stakingRewards
+          ? stakingRewards.amount / 1000000000000000000000000
+          : 0,
+        staked: stakedBalance
+          ? parseFloat((stakedBalance.balance.amount / 1000000).toFixed(2))
+          : 0,
+        liquid: liquidBalance ? (liquidBalance.amount / 1000000).toFixed(2) : 0,
+        total: stakingRewards
+          ? stakingRewards.amount / 1000000000000000000000000
+          : 0 + stakedBalance
+          ? (parseFloat(stakedBalance.balance.amount) / 1000000).toFixed(2)
+          : stakedBalance + liquidBalance
+          ? (parseFloat(liquidBalance.amount) / 1000000).toFixed(2)
+          : 0,
         chainAddress,
       };
       portfolio.push(data);

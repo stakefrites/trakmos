@@ -331,7 +331,7 @@ class App extends React.Component {
             </span>{" "}
             <a
               href="https://stakefrites.co/"
-              class="link-dark text-decoration-none"
+              className="link-dark text-decoration-none"
               target="_blank"
               rel="noreferrer"
             >
@@ -339,7 +339,7 @@ class App extends React.Component {
             </a>
             and&nbsp;
             <a
-              class="link-dark text-decoration-none"
+              className="link-dark text-decoration-none"
               href="https://ecostake.com"
               target="_blank"
               rel="noreferrer"

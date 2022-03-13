@@ -25,7 +25,6 @@
       "https://rpc-cosmoshub.blockapsis.com"
     ],
     "gasPrice": "0.0025uatom",
-    "testAddress": "cosmos1yxsmtnxdt6gxnaqrg0j0nudg7et2gqcz3k8ynk",
     "authzSupport": true
   },
   {
@@ -37,7 +36,6 @@
       "https://rpc.cosmos.directory/akash",
       "https://akash.technofractal.com:443"
     ],
-    "testAddress": "akash1yxsmtnxdt6gxnaqrg0j0nudg7et2gqczud2r2v",
     "ownerAddress": "akashvaloper1xgnd8aach3vawsl38snpydkng2nv8a4kqgs8hf",
     "authzSupport": false
   },
@@ -52,7 +50,6 @@
       "https://rpc.chihuahua.wtf"
     ],
     "gasPrice": "0.025uhuahua",
-    "testAddress": "chihuahua1yxsmtnxdt6gxnaqrg0j0nudg7et2gqczjr22j5",
     "ownerAddress": "chihuahuavaloper19vwcee000fhazmpt4ultvnnkhfh23ppwxll8zz",
     "authzSupport": false
   },
@@ -67,7 +64,6 @@
       "https://rpc-sentinel.keplr.app"
     ],
     "gasPrice": "0.02udvpn",
-    "testAddress": "sent1yxsmtnxdt6gxnaqrg0j0nudg7et2gqcz2d3ahe",
     "authzSupport": false
   }
 ]
