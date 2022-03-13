@@ -418,12 +418,12 @@ class App extends React.Component {
           )}
         </div>
         <footer className="align-items-center py-3 my-4 border-top row">
-          <div className="col-md-4 mt-2 col-sm-12">
+          <div className="col-md-4 col-sm-12 col-12 mt-2">
             <a href="https://akash.network" target="_blank" rel="noreferrer" className="col-md-4 mb-0 text-muted">
               <img src={PoweredByAkash} alt="Powered by Akash" width={200} />
             </a>
           </div>
-          <div className="col-md-7 mt-2 col-sm-12" >
+          <div className="col-lg-6 col-md-6 col-sm-12 col-12 mt-2" >
             <span>
               Built with 🧡&nbsp;by
             </span>
@@ -433,7 +433,7 @@ class App extends React.Component {
             <span>and&nbsp;</span>
             <a className="link-dark text-decoration-none" href="https://ecostake.com" target="_blank" rel="noreferrer">ECO Stake 🌱</a>
           </div>
-          <div className="col-md-1 mt-2 col-sm-12">
+          <div className="col-lg-2 col-md-2 col-sm-12 col-12 mt-2">
             <a href="https://twitter.com/stakefrites_" alt="Twitter" target="_blank" rel="noreferrer" className="link-dark text-decoration-none">
               <Twitter color="black" size={24} />
             </a>
