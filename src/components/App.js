@@ -5,6 +5,7 @@ import _ from "lodash";
 import AlertMessage from "./AlertMessage";
 import NetworkSelect from "./NetworkSelect";
 import Wallet from "./Wallet";
+import SomeTracker from "./SomeTracker/SomeTracker";
 import Coins from "./Coins";
 import ValidatorLink from "./ValidatorLink";
 import About from "./About";
@@ -364,6 +365,11 @@ class App extends React.Component {
                 <Button onClick={this.connect}>Connect Keplr</Button>
               </div>
             ))}
+          {this.state.address && (
+            <>
+              <SomeTracker />
+            </>
+          )}
           <hr />
           <p className="mt-5 text-center">
             Enabling REStake will authorize the validator to send{" "}
