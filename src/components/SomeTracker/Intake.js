@@ -13,7 +13,6 @@ const Intake = (props) => {
                 <th>Chain</th>
                 <th>Balance</th>
                 <th>Delegated</th>
-                <th>LP</th>
                 <th>Rewards</th>
                 <th>Total</th>
                 <th>USD$</th>
@@ -39,7 +38,6 @@ const Intake = (props) => {
                     </td>
                     <td>{bal.liquid}</td>
                     <td>{bal.staked}</td>
-                    <td>{bal.lp}</td>
                     <td>{bal.rewards}</td>
                     <td>{total}</td>
                     <td></td>
