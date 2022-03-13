@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import Table from "react-bootstrap/Table";
+import currency from "currency.js";
 
 const Intake = (props) => {
   console.log(props);
+  console.log(currency(12).format());
   return (
     <>
       <Container fluid>
@@ -35,12 +37,16 @@ const Intake = (props) => {
                     <td>{bal.staked}</td>
                     <td>{bal.rewards.toFixed(2)}</td>
                     <td>{bal.total.toFixed(2)}</td>
-                    <td>{bal.value.toFixed(2)}</td>
+                    <td>{currency(bal.value).format()}</td>
                   </tr>
                 );
               })}
             </tbody>
           </Table>
+        </div>
+        <div>
+          <h1>Total</h1>
+          <p>{currency(props.total).format()}</p>
         </div>
       </Container>
     </>

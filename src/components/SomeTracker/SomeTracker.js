@@ -6,6 +6,7 @@ function SomeTracker(props) {
   const [interval, setStateInterval] = useState();
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState();
+  const [totalValue, setTotalValue] = useState();
   const [balances, setBalances] = useState([{}]);
 
   const { queryClient, address } = props;
@@ -51,13 +52,20 @@ function SomeTracker(props) {
     }
   }
 
-  function getPortfolio() {
-    if (!getBalancesCache(true)) {
+  function getPortfolio(hardRefresh) {
+    const totalacc = 0;
+    const totalReducer = (acc, item) => {
+      return acc + parseInt(item.value);
+    };
+
+    if (!getBalancesCache(true) || hardRefresh) {
       const networks = Object.entries(props.networks);
       const portfolio = queryClient
         .getPortfolio(address, networks)
         .then((data) => {
           setBalances(data);
+          const totalValue = data.reduce(totalReducer, totalacc);
+          setTotalValue(totalValue);
           localStorage.setItem(
             "balances",
             JSON.stringify({ balances: data, time: +new Date() })
@@ -68,12 +76,14 @@ function SomeTracker(props) {
       const balances = getBalancesCache(true);
       console.log("cached data ", JSON.parse(balances));
       const newBalances = JSON.parse(balances);
+      const totalValue = newBalances.balances.reduce(totalReducer, totalacc);
+      setTotalValue(totalValue);
       setBalances(newBalances.balances);
       setIsLoaded(true);
     }
   }
   function refresh() {
-    getPortfolio();
+    getPortfolio(true);
     refreshInterval();
   }
 
@@ -87,6 +97,12 @@ function SomeTracker(props) {
   if (!isLoaded) {
     return (
       <div className="text-center">
+        <p>
+          We are currently loading all your balances. <br />
+          Please wait.
+          <br /> It is still quicker than switching on all your accounts in
+          Keplr
+        </p>
         <Spinner animation="border" role="status">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
@@ -100,7 +116,12 @@ function SomeTracker(props) {
       </>
     );
   }
-  return <Intake balances={balances} {...props} />;
+  return (
+    <>
+      <button onClick={() => refresh()}>Refresh</button>
+      <Intake balances={balances} total={totalValue} {...props} />
+    </>
+  );
 }
 
 export default SomeTracker;
