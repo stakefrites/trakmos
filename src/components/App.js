@@ -9,6 +9,7 @@ import SomeTracker from "./SomeTracker/SomeTracker";
 import Coins from "./Coins";
 import ValidatorLink from "./ValidatorLink";
 import About from "./About";
+import { Bech32 } from "@cosmjs/encoding";
 
 import { MsgGrant, MsgRevoke } from "cosmjs-types/cosmos/authz/v1beta1/tx.js";
 
@@ -30,7 +31,11 @@ class App extends React.Component {
     this.state = { validatorImages: {} };
     this.connect = this.connect.bind(this);
     this.getPortfolio = this.getPortfolio.bind(this);
+    this.getPrices = this.getPrices.bind(this);
+    this.getPricesCache = this.getPricesCache.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
     this.getBalancesCache = this.getBalancesCache.bind(this);
+    this.handleManualAddress = this.handleManualAddress.bind(this);
     this.showNetworkSelect = this.showNetworkSelect.bind(this);
     this.getValidatorImage = this.getValidatorImage.bind(this);
     this.loadValidatorImages = this.loadValidatorImages.bind(this);
@@ -41,11 +46,13 @@ class App extends React.Component {
     window.onload = async () => {
       if (!window.keplr) {
         this.setState({ keplr: false });
+        this.getPrices();
       } else {
         this.setState({ keplr: true });
         this.connect();
       }
     };
+    this.getPrices();
     window.addEventListener("keplr_keystorechange", this.connect);
     if (this.props.operators) {
       this.loadValidatorImages(
@@ -73,8 +80,15 @@ class App extends React.Component {
     window.removeEventListener("keplr_keystorechange", this.connect);
   }
 
+  handleSubmit(e) {
+    e.preventDefault();
+    const isValid = Bech32.decode(this.state.newAddress);
+    console.log("ISVALID", isValid);
+    this.setState({ address: this.state.newAddress });
+  }
+
   handleManualAddress(e) {
-    this.setState({ address: e.target.value });
+    this.setState({ newAddress: e.target.value });
   }
 
   setNetwork() {
@@ -128,6 +142,7 @@ class App extends React.Component {
         stargateClient: stargateClient,
         error: false,
       });
+      this.getPrices();
       this.getBalance();
       this.getPortfolio();
     }
@@ -166,6 +181,86 @@ class App extends React.Component {
       return cacheData.balances;
     }
   }
+
+  getPricesCache(prices, expireCache) {
+    const allCache = prices
+      .map(([name, config]) => {
+        //console.log("cahche cibfgig", config);
+        const cache = localStorage.getItem(config.coingecko_id);
+        //console.log("cache item", cache);
+
+        if (!cache) {
+          return;
+        }
+        let cacheData = {};
+        try {
+          cacheData = JSON.parse(cache);
+          const price = JSON.parse(cacheData.price);
+          cacheData.price = price;
+          cache = cacheData;
+        } catch {
+          cacheData = cache;
+        }
+
+        if (!cacheData.price) {
+        }
+
+        if (!expireCache) {
+          console.log("not expired", JSON.parse(cacheData).price);
+          return JSON.parse(cacheData).price;
+        }
+        if (!expireCache) return JSON.parse(cacheData);
+
+        const cacheTime = cacheData.time && new Date(cacheData.time);
+        if (!cacheData.time) return;
+
+        //const expiry = new Date() - 1000 * 60 * 60 * 24 * 3;
+        const expiry = new Date() - 1000 * 60 * 5;
+        if (cacheTime >= expiry) {
+          return cache.price;
+        }
+      })
+      .filter((price) => {
+        if (price == undefined) {
+          //skip
+        } else {
+          return true;
+        }
+      });
+    console.log("allcache", allCache);
+    return allCache;
+  }
+
+  async getPrices(hardRefresh) {
+    const networks = Object.entries(this.props.networks);
+    const networksCache = await this.getPricesCache(networks);
+    console.log(networksCache, "chache network");
+    const noCache = networksCache.length !== 0 ? true : false;
+    console.log(noCache);
+    if (!noCache || hardRefresh) {
+      console.log("THERE WAS NO CACHE");
+      const prices = await this.state.queryClient.getPrice(networks);
+      const pricesData = _.keyBy(prices, "coingecko_id");
+      this.setState({ prices: pricesData });
+
+      localStorage.setItem("prices", JSON.stringify(prices));
+      const realPrices = prices.map((price) => {
+        localStorage.setItem(
+          price.coingecko_id,
+          JSON.stringify({ price, time: +new Date() })
+        );
+      });
+    } else {
+      console.log("NOT getting prices... right?");
+      console.log(networks, "networks", this.props.network);
+      const prices = await this.getPricesCache(networks);
+      console.log("cached data ", prices);
+      const pricesData = _.keyBy(prices, "coingecko_id");
+      this.setState({
+        prices: pricesData,
+      });
+    }
+  }
   getPortfolio(hardRefresh) {
     const totalacc = 0;
     const totalReducer = (acc, item) => {
@@ -174,7 +269,6 @@ class App extends React.Component {
     this.setState({ isLoaded: false });
 
     if (!this.getBalancesCache(true) || hardRefresh) {
-      console.log(this.props.networks);
       const networks = Object.entries(this.props.networks);
       console.log("querying with address", this.state.address);
       const portfolio = this.state.queryClient
@@ -189,7 +283,7 @@ class App extends React.Component {
         });
     } else {
       const balances = this.getBalancesCache(true);
-      console.log("cached data ", JSON.parse(balances));
+      //console.log("cached data ", JSON.parse(balances));
       const newBalances = JSON.parse(balances);
       const totalValue = newBalances.balances.reduce(totalReducer, totalacc);
       this.setState({
@@ -376,12 +470,7 @@ class App extends React.Component {
                   <br />
                   WalletConnect and mobile support is coming soon.
                   <hr />
-                  <Form
-                    className="manual-address"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                    }}
-                  >
+                  <Form className="manual-address" onSubmit={this.handleSubmit}>
                     <Form.Group className="mb-3" controlId="formBasicEmail">
                       <Form.Label>Enter any $COSMOS address</Form.Label>
                       <Form.Control
@@ -406,10 +495,10 @@ class App extends React.Component {
             <>
               <SomeTracker
                 address={this.state.address}
+                prices={_.keyBy(this.state.prices, "coingecko_id")}
                 getPortfolio={this.getPortfolio}
                 isLoaded={this.state.isLoaded}
                 balances={this.state.balances}
-                total={this.state.totalValue}
                 networks={this.props.networks}
                 network={this.props.network}
                 queryClient={this.state.queryClient}

@@ -6,7 +6,6 @@ import { ArrowClockwise } from "react-bootstrap-icons";
 
 function SomeTracker(props) {
   const [interval, setStateInterval] = useState();
-  const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState();
   useEffect(() => {
     // Your code here
@@ -23,7 +22,7 @@ function SomeTracker(props) {
 
   function hardRefresh() {
     localStorage.removeItem("balances");
-    setIsLoaded(false);
+    props.setLoaded(false);
     refresh(true);
   }
 

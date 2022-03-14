@@ -1,6 +1,6 @@
 import axios from "axios";
 import _ from "lodash";
-import { findAsync } from "./Helpers.mjs";
+import { findAsync, mapAsync } from "./Helpers.mjs";
 import {
   setupStakingExtension,
   QueryClient as CosmjsQueryClient,
@@ -23,6 +23,18 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     Array.isArray(restUrls) ? restUrls : [restUrls],
     "rest"
   );
+
+  const stakedReducer = (acc, item) => {
+    return acc + parseInt(item.balance.amount);
+  };
+
+  const rewardsReducer = (acc, item) => {
+    if (item.reward.length == 0) {
+      return 0;
+    } else {
+      return acc + parseInt(item.reward[0].amount);
+    }
+  };
 
   /**
    * Make Client
@@ -206,15 +218,26 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     );
   }
 
-  const getPrice = (coinGeckoId) => {
-    return axios
-      .get("https://api.coingecko.com/api/v3/simple/price", {
-        params: {
-          ids: coinGeckoId,
-          vs_currencies: "usd",
-        },
-      })
-      .then((data) => data.data[coinGeckoId].usd);
+  const getPrice = async (chains) => {
+    console.log(chains, "chains in get price before map");
+    const asyncs = await mapAsync(chains, ([name, chain]) => {
+      const { coingecko_id } = chain;
+      try {
+        return (price = axios
+          .get("https://api.coingecko.com/api/v3/simple/price", {
+            params: {
+              ids: coingecko_id,
+              vs_currencies: "usd",
+            },
+          })
+          .then((data) => {
+            return { price: data.data[coingecko_id].usd, coingecko_id };
+          }));
+      } catch (error) {
+        return {};
+      }
+    });
+    return asyncs;
   };
 
   const getPortfolio = async (a, chains) => {
@@ -222,81 +245,77 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     const portfolio = [];
     for (let chainInst of chains) {
       const [chainName, chainConfig] = chainInst;
-      const chainIml = await Chain(chainConfig);
-      const rpcUrls = chainIml.chainData.apis.rpc.map((url) => url.address);
-      const { decimals } = chainIml;
-      const rpcUrl = await findAvailableUrl(
-        Array.isArray(rpcUrls) ? rpcUrls : [rpcUrls],
-        "rpc"
-      );
-      console.log("the rpc url", rpcUrl);
-      const price = parseFloat(await getPrice(chainIml.coinGeckoId));
-      const client = await makeClient(rpcUrl);
-      console.log("The client", client);
-      const { prefix } = chainIml;
-      const chainAddress = Bech32.encode(prefix, bech.data);
-      const rewardsReq = await client.distribution.delegationTotalRewards(
-        chainAddress
-      );
-      const liquid = await client.bank.allBalances(chainAddress);
-      let staked;
+      console.log(chainName, chainConfig);
       try {
-        staked = await client.staking.delegatorDelegations(chainAddress);
-      } catch (error) {
-        staked = { delegationResponses: [] };
-      }
-      const stakingAcc = 0;
-      const rewardsAcc = 0;
-
-      const stakedReducer = (acc, item) => {
-        return acc + parseInt(item.balance.amount);
-      };
-
-      const rewardsReducer = (acc, item) => {
-        if (item.reward.length == 0) {
-          return 0;
-        } else {
-          return acc + parseInt(item.reward[0].amount);
+        const chainIml = await Chain(chainConfig);
+        const rpcUrls = chainIml.chainData.apis.rpc.map((url) => url.address);
+        const { decimals, prefix } = chainIml;
+        const coingecko_id = chainIml.coinGeckoId;
+        console.log("IML", chainIml);
+        const rpcUrl = await findAvailableUrl(
+          Array.isArray(rpcUrls) ? rpcUrls : [rpcUrls],
+          "rpc"
+        );
+        console.log("the rpc url", rpcUrl);
+        const client = await makeClient(rpcUrl);
+        console.log("The client", client);
+        const chainAddress = Bech32.encode(prefix, bech.data);
+        const rewardsReq = await client.distribution.delegationTotalRewards(
+          chainAddress
+        );
+        const liquid = await client.bank.allBalances(chainAddress);
+        let staked;
+        try {
+          staked = await client.staking.delegatorDelegations(chainAddress);
+        } catch (error) {
+          staked = { delegationResponses: [] };
         }
-      };
+        const stakingAcc = 0;
+        const rewardsAcc = 0;
 
-      const totalTokensStaked =
-        staked.delegationResponses.length == 0
-          ? 0
-          : staked.delegationResponses.reduce(stakedReducer, stakingAcc);
+        const totalTokensStaked =
+          staked.delegationResponses.length == 0
+            ? 0
+            : staked.delegationResponses.reduce(stakedReducer, stakingAcc);
 
-      const totalTokensRewards =
-        rewardsReq.rewards.length == 0
-          ? 0
-          : rewardsReq.rewards.reduce(rewardsReducer, rewardsAcc);
-      console.log(chainAddress, "Total staked", totalTokensStaked);
+        const totalTokensRewards =
+          rewardsReq.rewards.length == 0
+            ? 0
+            : rewardsReq.rewards.reduce(rewardsReducer, rewardsAcc);
+        console.log(chainAddress, "Total staked", totalTokensStaked);
 
-      const liquidBal = liquid.find((val) =>
-        val.denom == chainIml.denom ? true : false
-      );
-      const rewards = totalTokensRewards / Math.pow(10, decimals + 18);
-      console.log(rewards, Math.pow(10, decimals + 18), totalTokensRewards);
+        const liquidBal = liquid.find((val) =>
+          val.denom == chainIml.denom ? true : false
+        );
+        const rewards = totalTokensRewards / Math.pow(10, decimals + 18);
+        console.log(rewards, Math.pow(10, decimals + 18), totalTokensRewards);
 
-      const stakedBalance = (
-        totalTokensStaked / Math.pow(10, decimals)
-      ).toFixed(2);
-      const liquidBalance = liquidBal
-        ? (parseFloat(liquidBal.amount) / Math.pow(10, decimals)).toFixed(2)
-        : 0;
-      const total =
-        rewards + parseFloat(stakedBalance) + parseFloat(liquidBalance);
-      console.log(total);
-      const data = {
-        name: chainIml.chainData.chain_name,
-        rewards,
-        staked: parseFloat(stakedBalance),
-        liquid: parseFloat(liquidBalance),
-        total,
-        chainAddress,
-        value: total * price,
-      };
-      portfolio.push(data);
+        const stakedBalance = (
+          totalTokensStaked / Math.pow(10, decimals)
+        ).toFixed(2);
+        const liquidBalance = liquidBal
+          ? (parseFloat(liquidBal.amount) / Math.pow(10, decimals)).toFixed(2)
+          : 0;
+        const total =
+          rewards + parseFloat(stakedBalance) + parseFloat(liquidBalance);
+        console.log(total);
+        const data = {
+          name: chainIml.chainData.chain_name,
+          rewards,
+          staked: parseFloat(stakedBalance),
+          liquid: parseFloat(liquidBalance),
+          coingecko_id,
+          total,
+          chainAddress,
+        };
+        console.log("pushing", data);
+        portfolio.push(data);
+      } catch (e) {
+        console.log(e);
+        return;
+      }
     }
+    console.log("WERE RETURNIN FOLIO", portfolio);
     return portfolio;
   };
 
@@ -305,6 +324,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     rpcUrl,
     restUrl,
     getAllValidators,
+    getPrice,
     getValidators,
     getAllValidatorDelegations,
     getValidatorDelegations,
@@ -315,5 +335,4 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     getPortfolio,
   };
 };
-
 export default QueryClient;

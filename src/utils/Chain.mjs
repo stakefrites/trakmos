@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import { uniqueArray } from "./Helpers.mjs";
+
 const Chain = async (data) => {
   const getChainData = () => {
     return axios
@@ -14,25 +16,10 @@ const Chain = async (data) => {
   };
 
   const chainData = await getChainData();
-  console.log("netowkr.json", data, "registry", chainData);
-  const networksRpc = data.apis.rpc.map((el) => ({ address: el }));
+  const newtorksJsonRpc = data.apis.rpc.map((el) => ({ address: el }));
   const tokenData = await getTokenData();
-  const allRpc = networksRpc.concat(chainData.apis.rpc);
-  const newChainData = {
-    ...chainData,
-    apis: {
-      rpc: allRpc,
-    },
-  };
-
-  console.log(
-    "netowkr.json",
-    data,
-    "registry",
-    chainData,
-    "newchain data",
-    newChainData
-  );
+  //console.log(chainData, "data", data);
+  const allRpc = newtorksJsonRpc.concat(chainData.apis.rpc);
 
   const getChainInfo = () => {
     return {
@@ -61,6 +48,26 @@ const Chain = async (data) => {
   const { prettyName, chainId, prefix, slip44 } = getChainInfo();
 
   const { denom, symbol, decimals, image, coinGeckoId } = getTokenInfo();
+  const newChainData = {
+    ...chainData,
+    apis: {
+      rpc: allRpc,
+    },
+    coinGeckoId,
+    decimals,
+    image,
+    denom,
+    symbol,
+  };
+
+  /*  console.log(
+    "netowkr.json",
+    data,
+    "registry",
+    chainData,
+    "newchain data",
+    newChainData
+  ); */
 
   return {
     prettyName,
