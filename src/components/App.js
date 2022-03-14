@@ -484,7 +484,7 @@ class App extends React.Component {
                       <Form.Label>Enter any $COSMOS address</Form.Label>
                       <Form.Control
                         type="text"
-                        value={this.state.address}
+                        value={this.state.newAddress}
                         onChange={this.handleManualAddress}
                         placeholder="osmo1eh... or cosmos1eh..."
                       />
