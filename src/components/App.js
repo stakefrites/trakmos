@@ -2,12 +2,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import React from "react";
 import _ from "lodash";
-import AlertMessage from "./AlertMessage";
+import AlertMessage from "./modules/AlertMessage";
 import NetworkSelect from "./NetworkSelect";
-import Wallet from "./Wallet";
+import Wallet from "./Stake/Wallet";
 import SomeTracker from "./SomeTracker/SomeTracker";
-import Coins from "./Coins";
-import ValidatorLink from "./ValidatorLink";
+import Coins from "./modules/Coins";
+import ValidatorLink from "./Stake/ValidatorLink";
 import About from "./About";
 import { Bech32 } from "@cosmjs/encoding";
 
@@ -15,15 +15,19 @@ import { MsgGrant, MsgRevoke } from "cosmjs-types/cosmos/authz/v1beta1/tx.js";
 
 import { Container, Button, Badge, Form } from "react-bootstrap";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import GitHubButton from "react-github-btn";
-import Logo from "../assets/logo.png";
-import Logo2x from "../assets/logo@2x.png";
-import Logo3x from "../assets/logo@3x.png";
 
 import PoweredByAkash from "../assets/powered-by-akash.svg";
 import { Twitter, Github } from "react-bootstrap-icons";
 import StakeFriteLogo from "../assets/Sigle_Stake_house@2x.png";
 import StakeFriteLogoLong from "../assets/Logo_Stake_house_VF_150.png";
+
+const App2 = (props) => {
+  return <p>App</p>;
+};
+
+const Stake = (props) => {
+  return <p>Stake</p>;
+};
 
 class App extends React.Component {
   constructor(props) {
@@ -234,13 +238,13 @@ class App extends React.Component {
   async getPrices(hardRefresh) {
     const networks = Object.entries(this.props.networks);
     const networksCache = await this.getPricesCache(networks);
-    console.log(networksCache, "chache network");
-    const noCache = networksCache.length !== 0 ? true : false;
-    console.log(noCache);
-    if (!noCache || hardRefresh) {
+    const noCache = networksCache.length == 0 ? true : false;
+    console.log("Do wwe get data?", noCache, noCache);
+    if (noCache) {
       console.log("THERE WAS NO CACHE");
       const prices = await this.state.queryClient.getPrice(networks);
       const pricesData = _.keyBy(prices, "coingecko_id");
+      console.log("prices", prices, "pricesData", pricesData);
       this.setState({ prices: pricesData });
 
       localStorage.setItem("prices", JSON.stringify(prices));
@@ -251,7 +255,7 @@ class App extends React.Component {
         );
       });
     } else {
-      console.log("NOT getting prices... right?");
+      console.log("NOT getting prices... We have cache right?");
       console.log(networks, "networks", this.props.network);
       const prices = await this.getPricesCache(networks);
       console.log("cached data ", prices);
@@ -271,19 +275,25 @@ class App extends React.Component {
     if (!this.getBalancesCache(true) || hardRefresh) {
       const networks = Object.entries(this.props.networks);
       console.log("querying with address", this.state.address);
-      const portfolio = this.state.queryClient
-        .getPortfolio(this.state.address, networks)
-        .then((data) => {
-          const totalValue = data.reduce(totalReducer, totalacc);
-          localStorage.setItem(
-            this.state.address,
-            JSON.stringify({ balances: data, time: +new Date() })
-          );
-          this.setState({ balances: data, totalValue, isLoaded: true });
-        });
+      try {
+        const portfolio = this.state.queryClient
+          .getPortfolio(this.state.address, networks)
+          .then((data) => {
+            console.log(data);
+            const totalValue = data.reduce(totalReducer, totalacc);
+            localStorage.setItem(
+              this.state.address,
+              JSON.stringify({ balances: data, time: +new Date() })
+            );
+            this.setState({ balances: data, totalValue, isLoaded: true });
+          });
+        return portfolio;
+      } catch (e) {
+        console.log(e);
+        return;
+      }
     } else {
       const balances = this.getBalancesCache(true);
-      //console.log("cached data ", JSON.parse(balances));
       const newBalances = JSON.parse(balances);
       const totalValue = newBalances.balances.reduce(totalReducer, totalacc);
       this.setState({
@@ -508,25 +518,53 @@ class App extends React.Component {
         </div>
         <footer className="align-items-center py-3 my-4 border-top row">
           <div className="col-md-4 col-sm-12 col-12 mt-2">
-            <a href="https://akash.network" target="_blank" rel="noreferrer" className="col-md-4 mb-0 text-muted">
+            <a
+              href="https://akash.network"
+              target="_blank"
+              rel="noreferrer"
+              className="col-md-4 mb-0 text-muted"
+            >
               <img src={PoweredByAkash} alt="Powered by Akash" width={200} />
             </a>
           </div>
-          <div className="col-lg-6 col-md-6 col-sm-12 col-12 mt-2" >
-            <span>
-              Built with 🧡&nbsp;by
-            </span>
-            <a href="https://stakefrites.co/" className="link-dark text-decoration-none" target="_blank" rel="noreferrer">
+          <div className="col-lg-6 col-md-6 col-sm-12 col-12 mt-2">
+            <span>Built with 🧡&nbsp;by</span>
+            <a
+              href="https://stakefrites.co/"
+              className="link-dark text-decoration-none"
+              target="_blank"
+              rel="noreferrer"
+            >
               Stake Frites (🥩,🍟)&nbsp;
             </a>
             <span>and&nbsp;</span>
-            <a className="link-dark text-decoration-none" href="https://ecostake.com" target="_blank" rel="noreferrer">ECO Stake 🌱</a>
+            <a
+              className="link-dark text-decoration-none"
+              href="https://ecostake.com"
+              target="_blank"
+              rel="noreferrer"
+            >
+              ECO Stake 🌱
+            </a>
           </div>
           <div className="col-lg-2 col-md-2 col-sm-12 col-12 mt-2">
-            <a href="https://twitter.com/stakefrites_" alt="Twitter" target="_blank" rel="noreferrer" className="link-dark text-decoration-none">
+            <a
+              href="https://twitter.com/stakefrites_"
+              alt="Twitter"
+              target="_blank"
+              rel="noreferrer"
+              className="link-dark text-decoration-none"
+            >
               <Twitter color="black" size={24} />
             </a>
-            <a href="https://github.com/stakefrites" alt="Github" target="_blank" rel="noreferrer" style={{ marginLeft: "10px" }} className="link-dark text-decoration-none">
+            <a
+              href="https://github.com/stakefrites"
+              alt="Github"
+              target="_blank"
+              rel="noreferrer"
+              style={{ marginLeft: "10px" }}
+              className="link-dark text-decoration-none"
+            >
               <Github color="black" size={24} />
             </a>
           </div>

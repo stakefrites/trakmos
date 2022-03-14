@@ -18,7 +18,6 @@ const Chain = async (data) => {
   const chainData = await getChainData();
   const newtorksJsonRpc = data.apis.rpc.map((el) => ({ address: el }));
   const tokenData = await getTokenData();
-  //console.log(chainData, "data", data);
   const allRpc = newtorksJsonRpc.concat(chainData.apis.rpc);
 
   const getChainInfo = () => {
@@ -59,15 +58,6 @@ const Chain = async (data) => {
     denom,
     symbol,
   };
-
-  /*  console.log(
-    "netowkr.json",
-    data,
-    "registry",
-    chainData,
-    "newchain data",
-    newChainData
-  ); */
 
   return {
     prettyName,

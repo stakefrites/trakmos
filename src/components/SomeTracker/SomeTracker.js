@@ -8,6 +8,7 @@ function SomeTracker(props) {
   const [interval, setStateInterval] = useState();
   const [error, setError] = useState();
   useEffect(() => {
+    console.log("some tracker", props);
     // Your code here
     // Add a function that should get data onLoad
     //this.getDelegations();
@@ -51,24 +52,32 @@ function SomeTracker(props) {
   if (error) {
     return (
       <>
-        <Intake {...props} />
+        <p>ERROR</p>
       </>
     );
   }
-  return (
-    <>
-      <p className="text-center">
-        <Button
-          onClick={hardRefresh}
-          variant="outline-secondary"
-          className="mb-3"
-        >
-          Refresh <ArrowClockwise color="black" size={16} />
-        </Button>
-      </p>
-      <Intake balances={props.balances} total={props.total} {...props} />
-    </>
-  );
+  if (props == undefined) {
+    return (
+      <>
+        <p>Error</p>
+      </>
+    );
+  } else {
+    return (
+      <>
+        <p className="text-center">
+          <Button
+            onClick={hardRefresh}
+            variant="outline-secondary"
+            className="mb-3"
+          >
+            Refresh <ArrowClockwise color="black" size={16} />
+          </Button>
+        </p>
+        <Intake balances={props.balances} total={props.total} {...props} />
+      </>
+    );
+  }
 }
 
 export default SomeTracker;

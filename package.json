@@ -30,7 +30,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "npx parcel src/index.html",
+    "start": "npx parcel src/index.html --port 80",
     "prebuild": "rm -rf dist/",
     "build": "npx parcel build src/index.html",
     "autostake": "node scripts/autostake.mjs"

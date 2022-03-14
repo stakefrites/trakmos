@@ -237,6 +237,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
         return {};
       }
     });
+    console.log("asyncs", asyncs);
     return asyncs;
   };
 
