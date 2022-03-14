@@ -36,3 +36,21 @@ header a.moniker {
   margin-right: auto;
   max-width: 600px;
 }
+
+.total-box {
+  color: #000;
+  width: 230px;
+  font-size: 20px;
+}
+
+.total-box:hover {
+  cursor: default;
+}
+
+.total-box-button{
+  margin-right: 15px;
+}
+
+.total-box-button:hover{
+  color: #fff;
+}

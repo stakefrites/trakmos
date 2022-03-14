@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Button } from "react-bootstrap";
 import Table from "react-bootstrap/Table";
 import currency from "currency.js";
+import { CashStack } from "react-bootstrap-icons";
 
 const Intake = (props) => {
   console.log("Intake props:", props);
@@ -16,7 +17,13 @@ const Intake = (props) => {
   return (
     <>
       <Container fluid>
-        <div>
+        <div className="col-12" align="right">
+          <button className="btn btn-outline-dark total-box">
+            <CashStack className="total-box-button" size={20} />
+            <span> {currency(totalValue).format()}</span>
+          </button>
+        </div>
+        <div className="col-12 mt-3">
           <Table striped bordered hover responsive variant="dark">
             <thead>
               <tr>
@@ -54,10 +61,6 @@ const Intake = (props) => {
               })}
             </tbody>
           </Table>
-        </div>
-        <div>
-          <h1>Total</h1>
-          <p>{currency(totalValue).format()}</p>
         </div>
       </Container>
     </>
