@@ -18,6 +18,7 @@ const Intake = (props) => {
     <>
       <Container fluid>
         <div className="col-12" align="right">
+          <p>{props.address}</p>
           <button className="btn btn-outline-dark total-box">
             <CashStack className="total-box-button" size={20} />
             <span> {currency(totalValue).format()}</span>
