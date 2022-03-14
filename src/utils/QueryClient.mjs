@@ -200,9 +200,9 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     return pages;
   };
 
-  function findAvailableUrl(urls, type) {
+  async function findAvailableUrl(urls, type) {
     const path = type === "rest" ? "/blocks/latest" : "/block";
-    return Promise.any(
+    const promis = await Promise.any(
       urls.map((url) => {
         return axios
           .get(url + path, { timeout: 10000 })
@@ -216,29 +216,40 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
           });
       })
     );
+    if (promis.AggregateError) {
+      console.log("Aggregate Error", promis);
+      return false;
+    }
+    console.log("promiseAny", promis);
+    return promis;
   }
 
   const getPrice = async (chains) => {
     console.log(chains, "chains in get price before map");
     const asyncs = await mapAsync(chains, ([name, chain]) => {
       const { coingecko_id } = chain;
-      try {
-        return (price = axios
-          .get("https://api.coingecko.com/api/v3/simple/price", {
-            params: {
-              ids: coingecko_id,
-              vs_currencies: "usd",
-            },
-          })
-          .then((data) => {
-            return { price: data.data[coingecko_id].usd, coingecko_id };
-          }));
-      } catch (error) {
-        return {};
-      }
+      const datarr = axios.get(
+        "https://api.coingecko.com/api/v3/simple/price",
+        {
+          params: {
+            ids: coingecko_id,
+            vs_currencies: "usd",
+          },
+        }
+      );
+      console.log("GetPrice in the coingecko return", datarr);
+      return datarr;
     });
-    console.log("asyncs", asyncs);
-    return asyncs;
+    const mappedRequest = asyncs.map((price, i) => {
+      console.log("mapping request", price, i, chains[i]);
+      const [nameChain, configChain] = chains[i];
+      return {
+        price: price.data[configChain.coingecko_id].usd,
+        coingecko_id: configChain.coingecko_id,
+      };
+    });
+    console.log("asyncs", asyncs, "mapped", mappedRequest);
+    return mappedRequest;
   };
 
   const getPortfolio = async (a, chains) => {
@@ -246,71 +257,86 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     const portfolio = [];
     for (let chainInst of chains) {
       const [chainName, chainConfig] = chainInst;
-      console.log(chainName, chainConfig);
+      const chainIml = await Chain(chainConfig);
+      const rpcUrls = chainIml.chainData.apis.rpc.map((url) => url.address);
+      const { decimals, prefix } = chainIml;
+      const chainAddress = Bech32.encode(prefix, bech.data);
       try {
-        const chainIml = await Chain(chainConfig);
-        const rpcUrls = chainIml.chainData.apis.rpc.map((url) => url.address);
-        const { decimals, prefix } = chainIml;
         const coingecko_id = chainIml.coinGeckoId;
         console.log("IML", chainIml);
         const rpcUrl = await findAvailableUrl(
           Array.isArray(rpcUrls) ? rpcUrls : [rpcUrls],
           "rpc"
         );
-        console.log("the rpc url", rpcUrl);
-        const client = await makeClient(rpcUrl);
-        console.log("The client", client);
-        const chainAddress = Bech32.encode(prefix, bech.data);
-        const rewardsReq = await client.distribution.delegationTotalRewards(
-          chainAddress
-        );
-        const liquid = await client.bank.allBalances(chainAddress);
-        let staked;
-        try {
-          staked = await client.staking.delegatorDelegations(chainAddress);
-        } catch (error) {
-          staked = { delegationResponses: [] };
+        console.log("result rpc should false", rpcUrl);
+        if (!rpcUrl) {
+          console.log("False, return dummy");
+          const data = {
+            name: chainIml.chainData.chain_name,
+            rewards: 0,
+            staked: 0,
+            liquid: 0,
+            coingecko_id,
+            total: 0,
+            chainAddress,
+          };
+          console.log("pushing", data);
+          portfolio.push(data);
+        } else {
+          console.log("the rpc url", rpcUrl);
+          const client = await makeClient(rpcUrl);
+          console.log("The client", client);
+          const rewardsReq = await client.distribution.delegationTotalRewards(
+            chainAddress
+          );
+          const liquid = await client.bank.allBalances(chainAddress);
+          let staked;
+          try {
+            staked = await client.staking.delegatorDelegations(chainAddress);
+          } catch (error) {
+            staked = { delegationResponses: [] };
+          }
+          const stakingAcc = 0;
+          const rewardsAcc = 0;
+
+          const totalTokensStaked =
+            staked.delegationResponses.length == 0
+              ? 0
+              : staked.delegationResponses.reduce(stakedReducer, stakingAcc);
+
+          const totalTokensRewards =
+            rewardsReq.rewards.length == 0
+              ? 0
+              : rewardsReq.rewards.reduce(rewardsReducer, rewardsAcc);
+          console.log(chainAddress, "Total staked", totalTokensStaked);
+
+          const liquidBal = liquid.find((val) =>
+            val.denom == chainIml.denom ? true : false
+          );
+          const rewards = totalTokensRewards / Math.pow(10, decimals + 18);
+          console.log(rewards, Math.pow(10, decimals + 18), totalTokensRewards);
+
+          const stakedBalance = (
+            totalTokensStaked / Math.pow(10, decimals)
+          ).toFixed(2);
+          const liquidBalance = liquidBal
+            ? (parseFloat(liquidBal.amount) / Math.pow(10, decimals)).toFixed(2)
+            : 0;
+          const total =
+            rewards + parseFloat(stakedBalance) + parseFloat(liquidBalance);
+          console.log(total);
+          const data = {
+            name: chainIml.chainData.chain_name,
+            rewards,
+            staked: parseFloat(stakedBalance),
+            liquid: parseFloat(liquidBalance),
+            coingecko_id,
+            total,
+            chainAddress,
+          };
+          console.log("pushing", data);
+          portfolio.push(data);
         }
-        const stakingAcc = 0;
-        const rewardsAcc = 0;
-
-        const totalTokensStaked =
-          staked.delegationResponses.length == 0
-            ? 0
-            : staked.delegationResponses.reduce(stakedReducer, stakingAcc);
-
-        const totalTokensRewards =
-          rewardsReq.rewards.length == 0
-            ? 0
-            : rewardsReq.rewards.reduce(rewardsReducer, rewardsAcc);
-        console.log(chainAddress, "Total staked", totalTokensStaked);
-
-        const liquidBal = liquid.find((val) =>
-          val.denom == chainIml.denom ? true : false
-        );
-        const rewards = totalTokensRewards / Math.pow(10, decimals + 18);
-        console.log(rewards, Math.pow(10, decimals + 18), totalTokensRewards);
-
-        const stakedBalance = (
-          totalTokensStaked / Math.pow(10, decimals)
-        ).toFixed(2);
-        const liquidBalance = liquidBal
-          ? (parseFloat(liquidBal.amount) / Math.pow(10, decimals)).toFixed(2)
-          : 0;
-        const total =
-          rewards + parseFloat(stakedBalance) + parseFloat(liquidBalance);
-        console.log(total);
-        const data = {
-          name: chainIml.chainData.chain_name,
-          rewards,
-          staked: parseFloat(stakedBalance),
-          liquid: parseFloat(liquidBalance),
-          coingecko_id,
-          total,
-          chainAddress,
-        };
-        console.log("pushing", data);
-        portfolio.push(data);
       } catch (e) {
         console.log(e);
         return;

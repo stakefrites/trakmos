@@ -23,7 +23,7 @@ function SomeTracker(props) {
 
   function hardRefresh() {
     localStorage.removeItem("balances");
-    props.setLoaded(false);
+    props.setLoaded();
     refresh(true);
   }
 

@@ -21,18 +21,15 @@ import { Twitter, Github } from "react-bootstrap-icons";
 import StakeFriteLogo from "../assets/Sigle_Stake_house@2x.png";
 import StakeFriteLogoLong from "../assets/Logo_Stake_house_VF_150.png";
 
-const App2 = (props) => {
-  return <p>App</p>;
-};
-
-const Stake = (props) => {
-  return <p>Stake</p>;
-};
-
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { validatorImages: {} };
+    this.state = {
+      validatorImages: {},
+      address: "",
+      balances: [],
+      prices: false,
+    };
     this.connect = this.connect.bind(this);
     this.getPortfolio = this.getPortfolio.bind(this);
     this.getPrices = this.getPrices.bind(this);
@@ -53,18 +50,19 @@ class App extends React.Component {
         this.getPrices();
       } else {
         this.setState({ keplr: true });
+        console.log("Connecting with Keplr", this.state.address);
         this.connect();
       }
     };
     this.getPrices();
     window.addEventListener("keplr_keystorechange", this.connect);
-    if (this.props.operators) {
+    /* if (this.props.operators) {
       this.loadValidatorImages(
         this.props.network,
         _.compact(this.props.operators.map((el) => el.validatorData))
       );
-    }
-    this.loadValidatorImages(this.props.network, this.props.validators);
+    } */
+    //this.loadValidatorImages(this.props.network, this.props.validators);
   }
 
   async componentDidUpdate(prevProps) {
@@ -110,6 +108,7 @@ class App extends React.Component {
   }
 
   async connect() {
+    //console.trace("In connect Method", this.props);
     if (!this.props.network.connected) {
       return this.setState({
         error: "Could not connect to any available API servers",
@@ -118,6 +117,7 @@ class App extends React.Component {
     const chainId = this.props.network.chainId;
     try {
       await window.keplr.enable(chainId);
+      console.log("Keplr enables");
     } catch (e) {
       console.log(e.message, e);
       await this.suggestChain(this.props.network);
@@ -187,64 +187,63 @@ class App extends React.Component {
   }
 
   getPricesCache(prices, expireCache) {
-    const allCache = prices
-      .map(([name, config]) => {
-        //console.log("cahche cibfgig", config);
-        const cache = localStorage.getItem(config.coingecko_id);
-        //console.log("cache item", cache);
+    //console.trace("Getting prices", prices);
+    const allCache = prices.map(([name, config]) => {
+      //console.log("cache config", config);
+      const cache = localStorage.getItem(config.coingecko_id);
+      //console.log("cache item", cache);
 
-        if (!cache) {
-          return;
-        }
-        let cacheData = {};
-        try {
-          cacheData = JSON.parse(cache);
-          const price = JSON.parse(cacheData.price);
-          cacheData.price = price;
-          cache = cacheData;
-        } catch {
-          cacheData = cache;
-        }
+      if (!cache) {
+        console.log("!cache");
+        return;
+      }
+      let cacheData = {};
+      try {
+        cacheData = JSON.parse(cache);
+        //console.log("cache data json parse getprices cache", cacheData);
+        const price = JSON.parse(cacheData.price);
+        cacheData.price = price;
+        cache = cacheData;
+      } catch {
+        cacheData = cache;
+      }
 
-        if (!cacheData.price) {
-        }
+      if (!cacheData.price) {
+      }
 
-        if (!expireCache) {
-          console.log("not expired", JSON.parse(cacheData).price);
-          return JSON.parse(cacheData).price;
-        }
-        if (!expireCache) return JSON.parse(cacheData);
+      if (!expireCache) {
+        console.log("not expired", JSON.parse(cacheData).price);
+        return JSON.parse(cacheData).price;
+      }
+      if (!expireCache) return JSON.parse(cacheData);
 
-        const cacheTime = cacheData.time && new Date(cacheData.time);
-        if (!cacheData.time) return;
+      const cacheTime = cacheData.time && new Date(cacheData.time);
+      if (!cacheData.time) return;
 
-        //const expiry = new Date() - 1000 * 60 * 60 * 24 * 3;
-        const expiry = new Date() - 1000 * 60 * 5;
-        if (cacheTime >= expiry) {
-          return cache.price;
-        }
-      })
-      .filter((price) => {
-        if (price == undefined) {
-          //skip
-        } else {
-          return true;
-        }
-      });
-    console.log("allcache", allCache);
-    return allCache;
+      //const expiry = new Date() - 1000 * 60 * 60 * 24 * 3;
+      const expiry = new Date() - 1000 * 60 * 5;
+      if (cacheTime >= expiry) {
+        return cache.price;
+      }
+    });
+
+    if (allCache.includes(undefined)) {
+      return false;
+    } else {
+      console.log("allcache", allCache);
+      return allCache;
+    }
   }
 
   async getPrices(hardRefresh) {
     const networks = Object.entries(this.props.networks);
     const networksCache = await this.getPricesCache(networks);
-    const noCache = networksCache.length == 0 ? true : false;
-    console.log("Do wwe get data?", noCache, noCache);
-    if (noCache) {
+    if (networksCache == false) {
       console.log("THERE WAS NO CACHE");
       const prices = await this.state.queryClient.getPrice(networks);
+      console.log("prices in App.js/getPrices", prices);
       const pricesData = _.keyBy(prices, "coingecko_id");
-      console.log("prices", prices, "pricesData", pricesData);
+      console.log("pricesData in App.js/getPrices", pricesData);
       this.setState({ prices: pricesData });
 
       localStorage.setItem("prices", JSON.stringify(prices));
@@ -505,9 +504,16 @@ class App extends React.Component {
             <>
               <SomeTracker
                 address={this.state.address}
-                prices={_.keyBy(this.state.prices, "coingecko_id")}
+                prices={
+                  this.state.prices !== false
+                    ? _.keyBy(this.state.prices, "coingecko_id")
+                    : this.state.prices
+                }
                 getPortfolio={this.getPortfolio}
                 isLoaded={this.state.isLoaded}
+                setLoaded={() => {
+                  this.setState({ isLoaded: false });
+                }}
                 balances={this.state.balances}
                 networks={this.props.networks}
                 network={this.props.network}
