@@ -225,8 +225,8 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
   }
 
   const getPrice = async (chains) => {
-    console.log(chains, "chains in get price before map");
-    const asyncs = await mapAsync(chains, ([name, chain]) => {
+    console.log(chains, "QUEEERY CLIENT: chains in get price before map");
+    const asyncs = await mapAsync(chains, (chain) => {
       const { coingecko_id } = chain;
       const datarr = axios.get(
         "https://api.coingecko.com/api/v3/simple/price",
@@ -240,9 +240,10 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       console.log("GetPrice in the coingecko return", datarr);
       return datarr;
     });
+    console.log("price asyncs", asyncs);
     const mappedRequest = asyncs.map((price, i) => {
-      console.log("mapping request", price, i, chains[i]);
-      const [nameChain, configChain] = chains[i];
+      console.log("mapping request", price, i, chains);
+      const configChain = chains[i];
       return {
         price: price.data[configChain.coingecko_id].usd,
         coingecko_id: configChain.coingecko_id,

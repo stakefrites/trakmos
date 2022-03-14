@@ -16,7 +16,7 @@ function NetworkFinder() {
 
   const [state, setState] = useReducer(
     (state, newState) => ({ ...state, ...newState }),
-    { loading: true, networks: [] }
+    { loading: true, networks: [], operators: [], validators: [] }
   );
 
   const getNetworks = async () => {
@@ -34,17 +34,24 @@ function NetworkFinder() {
     return _.compact(networks).reduce((a, v) => ({ ...a, [v.name]: v }), {});
   };
 
-  const changeNetwork = (network) => {
+  const changeNetwork = (network, validators) => {
+    const operators = Object.keys(validators).length
+      ? network.getOperators(validators)
+      : [];
     setState({
       network: network,
+      validators: validators,
+      operators: operators,
     });
+
+    navigate("/" + network.name);
   };
 
   useEffect(() => {
     if (!Object.keys(state.networks).length) {
       setState({ loading: true });
       getNetworks().then((networks) => {
-        setState({ networks: networks, loading: false });
+        setState({ networks: networks });
       });
     }
   }, [state.networks]);
@@ -69,6 +76,33 @@ function NetworkFinder() {
     }
   }, [state.networks, state.network, params.network, navigate]);
 
+  useEffect(() => {
+    if (state.error) return;
+
+    if (state.network && !Object.keys(state.validators).length) {
+      if (!state.network.connected) {
+        return setState({
+          loading: false,
+        });
+      }
+
+      state.network.getValidators().then(
+        (validators) => {
+          setState({
+            validators,
+            operators: state.network.getOperators(validators),
+            loading: false,
+          });
+        },
+        (error) =>
+          setState({
+            loading: false,
+            error: "Unable to connect right now, try again",
+          })
+      );
+    }
+  }, [state.network]);
+
   if (state.loading) {
     return (
       <div className="pt-5 text-center">
@@ -91,6 +125,7 @@ function NetworkFinder() {
     <NewApp
       networks={state.networks}
       network={state.network}
+      validators={state.validators}
       changeNetwork={(network, validators) =>
         changeNetwork(network, validators)
       }

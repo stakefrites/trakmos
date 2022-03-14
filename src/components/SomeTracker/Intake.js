@@ -5,33 +5,27 @@ import currency from "currency.js";
 import { CashStack } from "react-bootstrap-icons";
 
 const Intake = (props) => {
-  //console.log("Intake props:", props);
-  const totalacc = 0;
-  const totalReducer = (acc, item) => {
-    const thisTotal = item.total;
-    console.log("reducing in Intake", acc); //, item, thisTotal, props);
-    return acc + props.prices === undefined
-      ? 0
-      : thisTotal * props.prices[item.coingecko_id].price;
-  };
+  console.log("Intake props:", props);
   let totalValue = 0;
-  /* if (props.prices !== false) {
-    console.log("props.prices not equal to false", props.prices);
-    totalValue = props.balances.reduce(totalReducer, totalacc);
-    console.log("totalValue", totalValue);
-  } */
   const realBalances = props.balances.map((balance) => {
-    console.log("mapping balances", balance);
-    const thisPrice = props.prices[balance.coingecko_id].price;
-    console.log(balance.total, thisPrice);
-    totalValue += balance.total * thisPrice;
-    return {
-      ...balance,
-      price: thisPrice,
-      value: balance.total * thisPrice,
-    };
+    console.log("mapping balances", balance, props.prices);
+    if (!props.prices) {
+      return {
+        ...balance,
+      };
+    } else {
+      const thisPrice = props.prices[balance.coingecko_id].price;
+      if (!props.prices) {
+        console.log(props.prices);
+      }
+      totalValue += balance.total * thisPrice;
+      return {
+        ...balance,
+        price: thisPrice,
+        value: balance.total * thisPrice,
+      };
+    }
   });
-  console.log("real balances", realBalances, totalValue);
   return (
     <>
       <Container fluid>
@@ -56,10 +50,11 @@ const Intake = (props) => {
               </tr>
             </thead>
             <tbody>
-              {props.balances.map((bal) => {
+              {realBalances.map((bal) => {
+                console.log("real bal", bal);
                 let price;
                 let total;
-                if (props.price !== false) {
+                if (props.prices !== false) {
                   price = props.prices[bal.coingecko_id].price;
                   total = price * bal.total;
                 } else {

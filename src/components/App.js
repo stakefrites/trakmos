@@ -8,7 +8,8 @@ import Wallet from "./Stake/Wallet";
 import SomeTracker from "./SomeTracker/SomeTracker";
 import Coins from "./modules/Coins";
 import ValidatorLink from "./Stake/ValidatorLink";
-import About from "./About";
+import About from "./modules/About";
+import NewApp from "./NewApp";
 import { Bech32 } from "@cosmjs/encoding";
 
 import { MsgGrant, MsgRevoke } from "cosmjs-types/cosmos/authz/v1beta1/tx.js";
@@ -438,6 +439,7 @@ class App extends React.Component {
   render() {
     return (
       <Container>
+        <NewApp></NewApp>
         <header className="d-flex flex-wrap justify-content-between py-3 mb-4 border-bottom">
           <div className="logo d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
             <img src={StakeFriteLogoLong} height="75" alt="Stake Frites" />
@@ -467,6 +469,7 @@ class App extends React.Component {
             (!this.state.keplr ? (
               <>
                 <AlertMessage variant="warning" dismissible={false}>
+                  <NewApp></NewApp>
                   Please install the{" "}
                   <a
                     href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"
