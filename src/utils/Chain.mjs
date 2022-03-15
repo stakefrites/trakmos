@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import _ from "lodash";
+
 import { uniqueArray } from "./Helpers.mjs";
 
 const Chain = async (data) => {
@@ -18,7 +20,7 @@ const Chain = async (data) => {
   const chainData = await getChainData();
   const newtorksJsonRpc = data.apis.rpc.map((el) => ({ address: el }));
   const tokenData = await getTokenData();
-  const allRpc = newtorksJsonRpc.concat(chainData.apis.rpc);
+  const allRpc = _.compact(newtorksJsonRpc.concat(chainData.apis.rpc));
 
   const getChainInfo = () => {
     return {
@@ -60,6 +62,8 @@ const Chain = async (data) => {
   };
 
   return {
+    tokenData: getTokenData(),
+    tokenInfo: getTokenInfo(),
     prettyName,
     chainId,
     prefix,

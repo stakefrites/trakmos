@@ -1,104 +1,227 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import _ from "lodash";
-import AlertMessage from "./AlertMessage";
-import NetworkSelect from "./NetworkSelect";
-import Wallet from "./Wallet";
-import Coins from "./Coins";
-import ValidatorLink from "./ValidatorLink";
-import About from "./About";
 
-import { MsgGrant, MsgRevoke } from "cosmjs-types/cosmos/authz/v1beta1/tx.js";
+import { Spinner, Container, Button, Badge, Form } from "react-bootstrap";
 
-import { Container, Button, Badge } from "react-bootstrap";
-import { CopyToClipboard } from "react-copy-to-clipboard";
-import GitHubButton from "react-github-btn";
-import Logo from "../assets/logo.png";
-import Logo2x from "../assets/logo@2x.png";
-import Logo3x from "../assets/logo@3x.png";
+import SomeTrackerHome from "./SomeTracker/SomeTrackerHome";
+import AlertMessage from "./modules/AlertMessage";
+import Footer from "./modules/Footer";
+import Header from "./modules/Header";
+import About from "./modules/About";
 
-import PoweredByAkash from "../assets/powered-by-akash.svg";
+import { Bech32 } from "@cosmjs/encoding";
+
+const suggestChain = (network) => {
+  const currency = {
+    coinDenom: network.symbol,
+    coinMinimalDenom: network.denom,
+    coinDecimals: network.decimals,
+    coinGeckoId: network.coinGeckoId,
+  };
+  return window.keplr.experimentalSuggestChain({
+    rpc: network.rpcUrl,
+    rest: network.restUrl,
+    chainId: network.chainId,
+    chainName: network.prettyName,
+    stakeCurrency: currency,
+    bip44: { coinType: network.slip44 },
+    walletUrlForStaking: "https://restake.app/" + network.name,
+    bech32Config: {
+      bech32PrefixAccAddr: network.prefix,
+      bech32PrefixAccPub: network.prefix + "pub",
+      bech32PrefixValAddr: network.prefix + "valoper",
+      bech32PrefixValPub: network.prefix + "valoperpub",
+      bech32PrefixConsAddr: network.prefix + "valcons",
+      bech32PrefixConsPub: network.prefix + "valconspub",
+    },
+    currencies: [currency],
+    feeCurrencies: [currency],
+  });
+};
+
+function useUpdateEffect(effect, dependencies = []) {
+  const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      return effect();
+    }
+  }, dependencies);
+}
 
 const NewApp = (props) => {
-  const getPricesCache = async (prices, expireCache) => {
-    const allCache = prices
-      .map(([name, config]) => {
-        //console.log("cahche cibfgig", config);
-        const cache = localStorage.getItem(config.coingecko_id);
-        //console.log("cache item", cache);
+  const isInitialMount = useRef(true);
+  const { prices } = props;
 
-        if (!cache) {
-          return;
-        }
-        let cacheData = {};
-        try {
-          cacheData = JSON.parse(cache);
-          const price = JSON.parse(cacheData.price);
-          cacheData.price = price;
-          cache = cacheData;
-        } catch {
-          cacheData = cache;
-        }
+  console.log("newAPP reload", props);
+  const [address, setAddress] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
+  const [error, setError] = useState();
+  const [stargateClient, setStargateClient] = useState();
+  const [keplr, setKeplr] = useState();
+  const [accounts, setAccounts] = useState();
+  const [newAddress, setNewAddress] = useState("");
+  const [currentWallet, setCurrentWallet] = useState();
 
-        if (!cacheData.price) {
-        }
+  useUpdateEffect(() => {
+    console.log("Keplr use effect");
+    if (!keplr && window.keplr) {
+      console.log(
+        "Keplr use effect !keplr && window.keplr ",
+        keplr,
+        window.keplr,
+        "Setting Keplr to true"
+      );
+      setKeplr(true);
+    }
+  }, [keplr]);
 
-        if (!expireCache) {
-          console.log("not expired", JSON.parse(cacheData).price);
-          return JSON.parse(cacheData).price;
-        }
-        if (!expireCache) return JSON.parse(cacheData);
-
-        const cacheTime = cacheData.time && new Date(cacheData.time);
-        if (!cacheData.time) return;
-
-        //const expiry = new Date() - 1000 * 60 * 60 * 24 * 3;
-        const expiry = new Date() - 1000 * 60 * 5;
-        if (cacheTime >= expiry) {
-          return cache.price;
-        }
-      })
-      .filter((price) => {
-        if (price == undefined) {
-          //skip
-        } else {
-          return true;
-        }
-      });
-    console.log("allcache", allCache);
-    return allCache;
-  };
-
-  const getPrices = async (hardRefresh) => {
-    const networks = Object.entries(this.props.networks);
-    const networksCache = await this.getPricesCache(networks);
-    const noCache = networksCache.length == 0 ? true : false;
-    console.log("Do wwe get data?", noCache, noCache);
-    if (noCache) {
-      console.log("THERE WAS NO CACHE");
-      const prices = await this.state.queryClient.getPrice(networks);
-      const pricesData = _.keyBy(prices, "coingecko_id");
-      console.log("prices", prices, "pricesData", pricesData);
-      this.setState({ prices: pricesData });
-
-      localStorage.setItem("prices", JSON.stringify(prices));
-      const realPrices = prices.map((price) => {
-        localStorage.setItem(
-          price.coingecko_id,
-          JSON.stringify({ price, time: +new Date() })
-        );
-      });
+  useEffect(() => {
+    //getAccounts();=
+    window.addEventListener("keplr_keystorechange", reconsiderAddress);
+    if (!window.keplr) {
+      setKeplr(false);
     } else {
-      console.log("NOT getting prices... We have cache right?");
-      console.log(networks, "networks", this.props.network);
-      const prices = await this.getPricesCache(networks);
-      console.log("cached data ", prices);
-      const pricesData = _.keyBy(prices, "coingecko_id");
-      this.setState({
-        prices: pricesData,
-      });
+      setKeplr(true);
+    }
+  }, []);
+
+  const connect = async () => {
+    if (!props.network.connected) {
+      setError("Could not connect to any available API servers");
+    }
+    const chainId = props.network.chainId;
+    try {
+      await window.keplr.enable(chainId);
+      console.log("Keplr enables");
+    } catch (e) {
+      console.log("enable error signer");
+      console.log(e.message, e);
+      await suggestChain(props.network);
+    }
+    if (window.getOfflineSigner) {
+      console.log("offline signer");
+      const offlineSigner = await window.getOfflineSignerAuto(chainId);
+      const key = await window.keplr.getKey(chainId);
+      const stargateClient = await props.network.signingClient(
+        offlineSigner,
+        key
+      );
+
+      const stargateAddress = await stargateClient.getAddress();
+      setAddress(stargateAddress);
+      setStargateClient(stargateClient);
+      setError(false);
+      if (address !== false) {
+        console.log("address before balances", address);
+        getBalances();
+      }
     }
   };
-  return <h1>Allo</h1>;
+
+  const reconsiderAddress = async () => {
+    const chainId = this.props.network.chainId;
+    const key = await window.keplr.getKey(chainId);
+    const stargateClient = await this.props.network.signingClient(
+      offlineSigner,
+      key
+    );
+
+    const address = await stargateClient.getAddress();
+    setAddress(address);
+  };
+
+  const getAccounts = () => {
+    const currentAccounts = localStorage.getItem("savedAccounts");
+    console.log("current accounts", currentAccounts);
+    if (currentAccounts) {
+      const myAccounts = JSON.parse(currentAccounts);
+      setAccounts(myAccounts);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const isValid = Bech32.decode(newAddress);
+    if (isValid) {
+      setAddress(newAddress);
+    } else {
+      setError("This is not a valid Bech32 address");
+    }
+  };
+
+  const handleManualAddress = (e) => {
+    setNewAddress(e.target.value);
+  };
+
+  console.log(props.prices);
+
+  return (
+    <>
+      <Header />
+      <Container>
+        <div className="mb-5">
+          <AlertMessage message={error} variant="danger" dismissible={false} />
+          {address ? (
+            <>
+              <SomeTrackerHome
+                address={address}
+                error={error}
+                accounts={accounts}
+                {...props}
+              />
+            </>
+          ) : (
+            <div>
+              {!keplr ? (
+                <>
+                  <AlertMessage variant="warning" dismissible={false}>
+                    Please install the{" "}
+                    <a
+                      href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Keplr browser extension
+                    </a>{" "}
+                    using desktop Google Chrome.
+                    <br />
+                    WalletConnect and mobile support is coming soon.
+                    <hr />
+                    <Form className="manual-address" onSubmit={handleSubmit}>
+                      <Form.Group className="mb-3" controlId="formBasicEmail">
+                        <Form.Label>Enter any $COSMOS address</Form.Label>
+                        <Form.Control
+                          type="text"
+                          value={newAddress}
+                          onChange={handleManualAddress}
+                          placeholder="osmo1eh... or cosmos1eh..."
+                        />
+                      </Form.Group>
+                      <Button variant="primary" type="submit">
+                        Submit
+                      </Button>
+                    </Form>
+                  </AlertMessage>
+                </>
+              ) : (
+                <div className="mb-5 text-center">
+                  <Button onClick={connect}>Connect Keplr</Button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <Footer />
+        <About show={showAbout} onHide={() => setShowAbout(false)} />
+      </Container>
+    </>
+  );
 };
+
+export default NewApp;

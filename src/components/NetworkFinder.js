@@ -1,23 +1,99 @@
 import _ from "lodash";
 import axios from "axios";
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Network from "../utils/Network.mjs";
-import { overrideNetworks } from "../utils/Helpers.mjs";
-import App from "./App";
+import { overrideNetworks, mapAsync } from "../utils/Helpers.mjs";
+import NewApp from "./NewApp";
 
 import { Spinner } from "react-bootstrap";
 
 import networksData from "../networks.json";
 
 function NetworkFinder() {
-  const params = useParams();
-  const navigate = useNavigate();
+  const [network, setNetwork] = useState(false);
+  const [networks, setNetworks] = useState([]);
+  const [isNetworkLoading, setIsNetworkLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [prices, setPrices] = useState();
+  const [pricesLoaded, setPricesLoaded] = useState(false);
 
-  const [state, setState] = useReducer(
-    (state, newState) => ({ ...state, ...newState }),
-    { loading: true, networks: [], operators: [], validators: [] }
-  );
+  const getCache = (storageKey, valueKey, expireCache) => {
+    const cache = localStorage.getItem(storageKey);
+    if (!cache) {
+      return;
+    }
+
+    let cacheData = {};
+    try {
+      cacheData = JSON.parse(cache);
+      cacheData.coingecko_id = storageKey;
+    } catch {
+      cacheData = cache;
+    }
+
+    if (!cacheData[valueKey]) {
+      console.log("not value key", JSON.parse(cacheData));
+      return JSON.parse(cacheData);
+    }
+    if (!expireCache) {
+      console.log("cached not expired, returning cache data", cacheData);
+      return JSON.parse(cacheData);
+    }
+
+    const cacheTime = cacheData.time && new Date(cacheData.time);
+    if (!cacheData.time) return;
+
+    //const expiry = new Date() - 1000 * 60 * 60 * 24 * 3;
+    const expiry = new Date() - 1000 * 60 * 12;
+    if (cacheTime >= expiry) {
+      console.log("stilled cached", cacheData);
+      return cacheData;
+    }
+  };
+
+  const getAllCache = (arr, storageKey, valueKey, expireCache) => {
+    const allCache = arr.map((item) => {
+      return getCache(item.coingecko_id, valueKey, expireCache);
+    });
+    if (allCache.includes(undefined)) {
+      return false;
+    } else {
+      return allCache;
+    }
+  };
+
+  const getPrices = async (network, hardRefresh) => {
+    setPricesLoaded(false);
+    const networksArray = Object.values(networks);
+    const cachedPrices = await getAllCache(
+      networksArray,
+      "prices",
+      "price",
+      true
+    );
+    console.log("prices cache'", cachedPrices);
+    if (cachedPrices) {
+      console.log("Settiong prices cachce", cachedPrices);
+      setPrices(cachedPrices);
+      setPricesLoaded(true);
+    } else {
+      const pricesData = await network.queryClient.getPrice(networksArray);
+      console.log("Settiong prices NOCACHE", pricesData);
+      pricesData.map((price) => {
+        localStorage.setItem(
+          price.coingecko_id,
+          JSON.stringify({ price: price.price, time: +new Date() })
+        );
+      });
+      setPrices(pricesData);
+      localStorage.setItem(
+        "prices",
+        JSON.stringify({ prices: pricesData.prices, time: +new Date() })
+      );
+      setPricesLoaded(true);
+    }
+  };
 
   const getNetworks = async () => {
     const registryNetworks = await axios
@@ -34,101 +110,75 @@ function NetworkFinder() {
     return _.compact(networks).reduce((a, v) => ({ ...a, [v.name]: v }), {});
   };
 
-  const changeNetwork = (network, validators) => {
-    const operators = Object.keys(validators).length
-      ? network.getOperators(validators)
-      : [];
-    setState({
-      network: network,
-      validators: validators,
-      operators: operators,
-    });
-
-    navigate("/" + network.name);
+  const changeNetwork = (network) => {
+    setNetwork(network);
   };
 
   useEffect(() => {
-    if (!Object.keys(state.networks).length) {
-      setState({ loading: true });
+    if (!Object.keys(networks).length) {
+      setIsNetworkLoading(true);
       getNetworks().then((networks) => {
-        setState({ networks: networks });
+        setNetworks(networks);
+        setIsNetworkLoading(false);
       });
     }
-  }, [state.networks]);
+  }, [networks]);
 
   useEffect(() => {
-    if (Object.keys(state.networks).length && !state.network) {
-      const networkName = params.network || Object.keys(state.networks)[0];
-      const data = state.networks[networkName];
-      if (params.network && !data) {
-        navigate("/" + Object.keys(state.networks)[0]);
-      }
+    console.log(
+      "Networks, Network use Effect, navigate",
+      Object.keys(networks).length && !network
+    );
+    if (Object.keys(networks).length && !network) {
+      console.log("Network not setted");
+      const networkName = Object.keys(networks)[0];
+      const data = networks[networkName];
       if (!data) {
-        setState({ loading: false });
+        setIsNetworkLoading(false);
         return;
       }
-      if (!params.network) {
-        navigate("/" + networkName);
-      }
-      Network(data).then((network) => {
-        setState({ network: network });
-      });
-    }
-  }, [state.networks, state.network, params.network, navigate]);
-
-  useEffect(() => {
-    if (state.error) return;
-
-    if (state.network && !Object.keys(state.validators).length) {
-      if (!state.network.connected) {
-        return setState({
-          loading: false,
-        });
-      }
-
-      state.network.getValidators().then(
-        (validators) => {
-          setState({
-            validators,
-            operators: state.network.getOperators(validators),
-            loading: false,
+      Network(data)
+        .then((network) => {
+          console.log("Set Network data", data);
+          setNetwork(network);
+          getPrices(network);
+        })
+        .then(() => {
+          console.log(networks);
+          return mapAsync(Object.values(networks), async (network) => {
+            const newData = await Network(network);
+            return newData;
           });
-        },
-        (error) =>
-          setState({
-            loading: false,
-            error: "Unable to connect right now, try again",
-          })
-      );
+        })
+        .then((data) => {
+          console.log("new improved Data", data);
+          setNetworks(data);
+        });
     }
-  }, [state.network]);
+  }, [networks, network]);
 
-  if (state.loading) {
+  if (isNetworkLoading && !network && !pricesLoaded) {
     return (
       <div className="pt-5 text-center">
         <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">
+            Initializing blockchain data...
+          </span>
         </Spinner>
       </div>
     );
   }
 
-  if (state.error) {
+  if (error) {
     return <p>Loading failed</p>;
   }
 
-  if (!state.network) {
-    return <p>Page not found</p>;
-  }
-
   return (
-    <App
-      networks={state.networks}
-      network={state.network}
-      validators={state.validators}
-      changeNetwork={(network, validators) =>
-        changeNetwork(network, validators)
-      }
+    <NewApp
+      prices={_.keyBy(prices, "coingecko_id")}
+      networks={networks}
+      network={network}
+      changeNetwork={changeNetwork}
     />
   );
 }
