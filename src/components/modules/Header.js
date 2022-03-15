@@ -6,7 +6,7 @@ function Header(props) {
     <header className="d-flex flex-wrap justify-content-between py-3 mb-4 border-bottom">
       <div className="logo d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
         <img src={StakeFriteLogo} height="75" alt="Stake Frites" />{" "}
-        <span>Trackmos</span>
+        <h2>Trakmos</h2>
       </div>
       <div className="invisible d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none"></div>
     </header>
