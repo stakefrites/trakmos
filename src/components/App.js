@@ -5,7 +5,7 @@ import _ from "lodash";
 import AlertMessage from "./modules/AlertMessage";
 import NetworkSelect from "./NetworkSelect";
 import Wallet from "./Stake/Wallet";
-import SomeTracker from "./SomeTracker/SomeTracker";
+import SomeTracker from "./SomeTracker/SomeTrackerHome";
 import Coins from "./modules/Coins";
 import ValidatorLink from "./Stake/ValidatorLink";
 import About from "./modules/About";
