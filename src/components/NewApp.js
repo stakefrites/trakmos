@@ -13,6 +13,17 @@ import About from "./modules/About";
 
 import { Bech32 } from "@cosmjs/encoding";
 
+function useUpdateEffect(effect, dependencies = []) {
+  const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      return effect();
+    }
+  }, dependencies);
+}
 const suggestChain = (network) => {
   const currency = {
     coinDenom: network.symbol,
@@ -41,29 +52,16 @@ const suggestChain = (network) => {
   });
 };
 
-function useUpdateEffect(effect, dependencies = []) {
-  const isInitialMount = useRef(true);
-
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    } else {
-      return effect();
-    }
-  }, dependencies);
-}
-
 const NewApp = (props) => {
   const isInitialMount = useRef(true);
   const { prices } = props;
 
-  console.log("newAPP reload", props);
   const [address, setAddress] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [error, setError] = useState();
   const [stargateClient, setStargateClient] = useState();
   const [keplr, setKeplr] = useState();
-  const [accounts, setAccounts] = useState();
+  const [accounts, setAccounts] = useState([]);
   const [newAddress, setNewAddress] = useState("");
   const [currentWallet, setCurrentWallet] = useState();
 
@@ -81,11 +79,13 @@ const NewApp = (props) => {
   }, [keplr]);
 
   useEffect(() => {
-    //getAccounts();=
+    getAccounts();
+    getAccounts();
     window.addEventListener("keplr_keystorechange", reconsiderAddress);
     if (!window.keplr) {
       setKeplr(false);
     } else {
+      connect();
       setKeplr(true);
     }
   }, []);
@@ -101,12 +101,13 @@ const NewApp = (props) => {
     } catch (e) {
       console.log("enable error signer");
       console.log(e.message, e);
-      await suggestChain(props.network);
+      await suggestChain(props.network, window);
     }
     if (window.getOfflineSigner) {
       console.log("offline signer");
       const offlineSigner = await window.getOfflineSignerAuto(chainId);
       const key = await window.keplr.getKey(chainId);
+      console.log(key, offlineSigner, Bech32.encode(props.network.prefix, key));
       const stargateClient = await props.network.signingClient(
         offlineSigner,
         key
@@ -124,14 +125,15 @@ const NewApp = (props) => {
   };
 
   const reconsiderAddress = async () => {
-    const chainId = this.props.network.chainId;
+    console.log("reconsidering address");
+    const chainId = props.network.chainId;
     const key = await window.keplr.getKey(chainId);
-    const stargateClient = await this.props.network.signingClient(
-      offlineSigner,
-      key
-    );
+    console.log("trackmos address", Bech32.encode("trackmos", key));
 
-    const address = await stargateClient.getAddress();
+    const address = key.bech32Address;
+    const newAccounts = _.uniq([...accounts].push(address));
+    //setAccounts(newAccounts);
+    localStorage.setItem("savedAccounts", newAccounts);
     setAddress(address);
   };
 
@@ -140,7 +142,8 @@ const NewApp = (props) => {
     console.log("current accounts", currentAccounts);
     if (currentAccounts) {
       const myAccounts = JSON.parse(currentAccounts);
-      setAccounts(myAccounts);
+      console.log("you have accounts", myAccounts);
+      setAccounts(_.uniq(myAccounts));
     }
   };
 
@@ -162,16 +165,18 @@ const NewApp = (props) => {
 
   return (
     <>
-      <Header />
       <Container>
+        <Header />
         <div className="mb-5">
           <AlertMessage message={error} variant="danger" dismissible={false} />
           {address ? (
             <>
               <SomeTrackerHome
                 address={address}
+                setAddress={setAddress}
                 error={error}
                 accounts={accounts}
+                setAccounts={setAccounts}
                 {...props}
               />
             </>
@@ -180,6 +185,27 @@ const NewApp = (props) => {
               {!keplr ? (
                 <>
                   <AlertMessage variant="warning" dismissible={false}>
+                    {Array.isArray(accounts) ? (
+                      <div>
+                        <p>You have {accounts.length} accounts saved</p>
+                        {accounts.map((account) => {
+                          return (
+                            <div>
+                              <Button
+                                onClick={() => {
+                                  setAddress(account);
+                                }}
+                                variant="outline-dark"
+                              >
+                                {account}
+                              </Button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      ""
+                    )}
                     Please install the{" "}
                     <a
                       href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"

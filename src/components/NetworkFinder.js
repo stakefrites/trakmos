@@ -119,7 +119,7 @@ function NetworkFinder() {
       setIsNetworkLoading(true);
       getNetworks().then((networks) => {
         setNetworks(networks);
-        setIsNetworkLoading(false);
+        // setIsNetworkLoading(false);
       });
     }
   }, [networks]);
@@ -134,7 +134,7 @@ function NetworkFinder() {
       const networkName = Object.keys(networks)[0];
       const data = networks[networkName];
       if (!data) {
-        setIsNetworkLoading(false);
+        //setIsNetworkLoading(false);
         return;
       }
       Network(data)
@@ -144,7 +144,6 @@ function NetworkFinder() {
           getPrices(network);
         })
         .then(() => {
-          console.log(networks);
           return mapAsync(Object.values(networks), async (network) => {
             const newData = await Network(network);
             return newData;
@@ -153,13 +152,15 @@ function NetworkFinder() {
         .then((data) => {
           console.log("new improved Data", data);
           setNetworks(data);
+          setIsNetworkLoading(false);
         });
     }
   }, [networks, network]);
 
-  if (isNetworkLoading && !network && !pricesLoaded) {
+  if (isNetworkLoading) {
     return (
       <div className="pt-5 text-center">
+        <p> Initializing blockchain data...</p>
         <Spinner animation="border" role="status">
           <span className="visually-hidden">
             Initializing blockchain data...

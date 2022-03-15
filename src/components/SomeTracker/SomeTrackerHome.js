@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Result from "./Result";
 import { Spinner, Button } from "react-bootstrap";
 import { ArrowClockwise } from "react-bootstrap-icons";
+import _ from "lodash";
 
 function useUpdateEffect(effect, dependencies = []) {
   const isInitialMount = useRef(true);
@@ -16,6 +17,7 @@ function useUpdateEffect(effect, dependencies = []) {
 }
 
 function SomeTrackerHome(props) {
+  console.log("new some tracker reaload", props);
   const [balances, setBalances] = useState();
   const [balancesLoaded, setBalancesLoaded] = useState(false);
   const [interval, setStateInterval] = useState();
@@ -27,8 +29,9 @@ function SomeTrackerHome(props) {
   }, []);
 
   useEffect(() => {
-    console.log("effect hook for balances");
-  }, [balances]);
+    console.log("effect hook for balances", props.address);
+    refresh();
+  }, [props.address]);
 
   function refresh(hardRefresh) {
     getBalances();
@@ -37,6 +40,7 @@ function SomeTrackerHome(props) {
   function hardRefresh() {
     console.log("HR address", props.address);
     localStorage.removeItem("balances");
+    setBalances([]);
     setBalancesLoaded(false);
     refresh(true);
   }
@@ -68,16 +72,17 @@ function SomeTrackerHome(props) {
     let cacheData = {};
     try {
       cacheData = JSON.parse(cache);
-      console.log("parsed cache", cacheData);
-      const { balances } = cacheData;
+      console.log("parsed cache", JSON.parse(cacheData));
+      const { balances } = JSON.parse(cacheData);
       console.log("parsed balances", balances);
       cacheData.balances = balances;
 
       cache = cacheData;
     } catch {
+      console.log("catched", cache, cacheData);
       cacheData.balances = cache;
     }
-    if (!cacheData.balances) {
+    if (!Array.isArray(cacheData.balances)) {
       console.log("not balances");
       return;
     }
@@ -102,16 +107,17 @@ function SomeTrackerHome(props) {
     const totalReducer = (acc, item) => {
       return acc + parseInt(item.value);
     };
+    const cache = getBalancesCache(true);
+    console.log(cache);
     setBalancesLoaded(false);
-    console.log(!getBalancesCache, "balances cache");
+    console.log(
+      "getting balances, if true, go to network",
+      getBalancesCache(true) == undefined,
+      getBalancesCache(true) && hardRefresh
+    );
 
     if (!getBalancesCache(true) || hardRefresh) {
-      console.log("Getting balances from Network", getBalancesCache());
       const networks = Object.entries(props.networks);
-      console.log(
-        "new app, getting balabnec with query",
-        props.network.queryClient
-      );
       try {
         const portfolio = props.network.queryClient
           .getPortfolio(props.address, props.networks)
@@ -121,6 +127,17 @@ function SomeTrackerHome(props) {
               props.address,
               JSON.stringify({ balances: data, time: +new Date() })
             );
+            const newAccounts = props.accounts
+              ? [props.address, ...props.accounts]
+              : [props.address];
+            console.log(
+              "ACCOUNTS PROPS & NEW ACCOUNTS",
+              props.accounts,
+              props.address,
+              newAccounts
+            );
+            localStorage.setItem("savedAccounts", JSON.stringify(newAccounts));
+            props.setAccounts(_.uniq(newAccounts));
             setBalances(data);
             setBalancesLoaded(true);
           });
@@ -130,17 +147,19 @@ function SomeTrackerHome(props) {
         return;
       }
     } else {
-      console.log("Getting balances from cache", getBalancesCache());
       const balances = getBalancesCache(true);
+      console.log("balances cachce", balances);
       const newBalances = JSON.parse(balances);
+
       const totalValue = newBalances.balances.reduce(totalReducer, totalacc);
       setBalances(newBalances.balances);
       setBalancesLoaded(true);
     }
   };
-  if (!balancesLoaded && !balances) {
+  if (!balancesLoaded) {
     return (
       <div className="pt-5 text-center">
+        <p>Loading all balances ....</p>
         <Spinner animation="border" role="status">
           <span className="visually-hidden">
             Initializing blockchain data...
@@ -161,6 +180,28 @@ function SomeTrackerHome(props) {
           Refresh Balances <ArrowClockwise color="black" size={16} />
         </Button>
       </p>
+      {Array.isArray(props.accounts) ? (
+        <div>
+          <p>You have {props.accounts.length} accounts saved</p>
+          {props.accounts.map((account) => {
+            const styles = account == props.address ? "dark" : "outline-dark";
+            return (
+              <div key={account}>
+                <Button
+                  variant={styles}
+                  onClick={() => {
+                    props.setAddress(account);
+                  }}
+                >
+                  {account}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        ""
+      )}
       <Result balances={balances} {...props} />
     </>
   );

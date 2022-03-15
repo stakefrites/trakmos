@@ -6,13 +6,10 @@ import { CashStack } from "react-bootstrap-icons";
 import _ from "lodash";
 
 const Result = (props) => {
-  console.log("Result  --->", props);
   let totalValue = 0;
 
   if (props.balances !== undefined) {
     const realBalances = props.balances.map((balance) => {
-      console.log("mapping balances", balance, props.prices);
-
       const thisPrice = props.prices[balance.coinGeckoId].price;
       totalValue += balance.total * thisPrice;
       return {
