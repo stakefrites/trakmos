@@ -10,7 +10,11 @@ const Result = (props) => {
 
   if (props.balances !== undefined) {
     const realBalances = props.balances.map((balance) => {
-      if (props.prices[balance.coinGeckoId] !== undefined) {
+      console.log("mapping balances", props.prices, balance);
+      if (
+        props.prices[balance.coinGeckoId] !== undefined &&
+        props.prices[balance.coinGeckoId].price !== undefined
+      ) {
         const thisPrice = props.prices[balance.coinGeckoId].price;
         totalValue += balance.total * thisPrice;
         return {
@@ -53,7 +57,7 @@ const Result = (props) => {
                 {realBalances.map((bal) => {
                   return (
                     <tr key={bal.chainAddress}>
-                      <td>{currency(bal.price).format()}</td>
+                      <td>{currency(bal.price, { precision: 3 }).format()}</td>
                       <td width="auto">
                         <img
                           src={_.keyBy(props.networks, "name")[bal.name].image}
