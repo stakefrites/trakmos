@@ -32,7 +32,7 @@
   "scripts": {
     "start": "npx parcel src/public/index.html --port 80",
     "prebuild": "rm -rf dist/",
-    "build": "npx parcel build src/index.html",
+    "build": "npx parcel build src/public/index.html",
     "autostake": "node scripts/autostake.mjs"
   },
   "eslintConfig": {
