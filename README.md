@@ -10,8 +10,8 @@ Try it out at [trackmos.stakefrites.co](https://trackmos.stakefrites.co/).
 
 ## Disclaimer
 
-The initial version of REStake was built quickly to take advantage of the new authz features. I'm personally not a React or Javascript developer, and this project leans extremely heavily on the [CosmJS project](https://github.com/cosmos/cosmjs) and other fantastic codebases like [Keplr Wallet](https://github.com/chainapsis/keplr-wallet) and [Osmosis Zone frontend](https://github.com/osmosis-labs/osmosis-frontend). It functions very well and any attack surface is very limited however. Any contributions, suggestions and ideas from the community are extremely welcome.
+The initial version of Trackmos was built quickly. I'm personally not a React or Javascript developer, and this project leans extremely heavily on the [CosmJS project](https://github.com/cosmos/cosmjs) and other fantastic codebases like [Keplr Wallet](https://github.com/chainapsis/keplr-wallet) and [Osmosis Zone frontend](https://github.com/osmosis-labs/osmosis-frontend). It functions very well and any attack surface is very limited however. Any contributions, suggestions and ideas from the community are extremely welcome.
 
-## ECO Stake 🌱
+## Stake Frites (🥩 , 🍟)
 
-ECO Stake is a climate positive validator, but we care about the Cosmos ecosystem too. We built REStake to make it easy for all validators to run an autocompounder with Authz, and it's one of many projects we work on in the ecosystem. [Delegate with us](https://ecostake.com) to support more projects like this.
+Stake Frites is an active validator, but we want to reduce pains and provide useful tools for the community. We built Trackmos to make it easy for all cosmonauts to easily access all their balances. [Delegate with us](https://stakefrites.co) to support more projects like this.
