@@ -5,9 +5,9 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import NetworkFinder from "./components/NetworkFinder";
+import NetworkFinder from "../components/NetworkFinder";
 import "./index.css";
-import reportWebVitals from "./utils/reportWebVitals";
+import reportWebVitals from "../utils/reportWebVitals";
 
 Bugsnag.start({
   apiKey: "5cda10bb1c98f351cd0b722a1535d8c2",
