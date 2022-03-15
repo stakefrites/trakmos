@@ -10,7 +10,9 @@ export function overrideNetworks(networks, overrides) {
 }
 
 export function mapAsync(array, callbackfn) {
-  return Promise.all(array.map(callbackfn));
+  const mapAsyncResult = Promise.all(array.map(callbackfn));
+  console.log(mapAsyncResult);
+  return mapAsyncResult;
 }
 
 export function findAsync(array, callbackfn) {

@@ -228,25 +228,31 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     console.log("QUEEERY CLIENT: chains in get price before map", chains);
     const asyncs = await mapAsync(chains, (chain) => {
       const { coingecko_id } = chain;
-      const datarr = axios.get(
-        "https://api.coingecko.com/api/v3/simple/price",
-        {
-          params: {
-            ids: coingecko_id,
-            vs_currencies: "usd",
-          },
-        }
-      );
-      console.log("GetPrice in the coingecko return", datarr);
-      return datarr;
+      if (coingecko_id !== undefined) {
+        const datarr = axios.get(
+          "https://api.coingecko.com/api/v3/simple/price",
+          {
+            params: {
+              ids: coingecko_id,
+              vs_currencies: "usd",
+            },
+          }
+        );
+        console.log("GetPrice in the coingecko return", datarr);
+        return datarr;
+      } else {
+        return {};
+      }
     });
     console.log("price asyncs", asyncs);
     const mappedRequest = asyncs.map((price, i) => {
       console.log("mapping request", price, i, chains);
       const configChain = chains[i];
       return {
-        price: price.data[configChain.coingecko_id].usd,
-        coingecko_id: configChain.coingecko_id,
+        price:
+          price.status === 200 ? price.data[configChain.coingecko_id].usd : 0,
+        coingecko_id:
+          price.status === 200 ? configChain.coingecko_id : configChain.name,
       };
     });
     console.log("asyncs", asyncs, "mapped", mappedRequest);

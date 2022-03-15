@@ -23,11 +23,13 @@ function NetworkFinder() {
     if (!cache) {
       return;
     }
+    console.log("parsing cachce", storageKey, valueKey, cache);
 
     let cacheData = {};
     try {
       cacheData = JSON.parse(cache);
       cacheData.coingecko_id = storageKey;
+      console.log("parsing cachce", storageKey, valueKey, cache, cacheData);
     } catch {
       cacheData = cache;
     }
@@ -56,6 +58,7 @@ function NetworkFinder() {
     const allCache = arr.map((item) => {
       return getCache(item.coingecko_id, valueKey, expireCache);
     });
+    console.log("allcache", allCache);
     if (allCache.includes(undefined)) {
       return false;
     } else {
@@ -76,6 +79,10 @@ function NetworkFinder() {
     if (cachedPrices) {
       console.log("Settiong prices cachce", cachedPrices);
       setPrices(cachedPrices);
+      localStorage.setItem(
+        "prices",
+        JSON.stringify({ prices: cachedPrices, time: +new Date() })
+      );
       setPricesLoaded(true);
     } else {
       const pricesData = await network.queryClient.getPrice(networksArray);
@@ -83,7 +90,7 @@ function NetworkFinder() {
       pricesData.map((price) => {
         localStorage.setItem(
           price.coingecko_id,
-          JSON.stringify({ price: price.price, time: +new Date() })
+          JSON.stringify({ price: price, time: +new Date() })
         );
       });
       setPrices(pricesData);

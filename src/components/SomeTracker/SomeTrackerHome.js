@@ -71,19 +71,18 @@ function SomeTrackerHome(props) {
 
     let cacheData = {};
     try {
-      cacheData = JSON.parse(cache);
-      console.log("parsed cache", JSON.parse(cacheData));
-      const { balances } = JSON.parse(cacheData);
+      const parsedCacheData = JSON.parse(cache);
+      console.log("parsed cache", parsedCacheData);
+      const { balances } = parsedCacheData;
       console.log("parsed balances", balances);
       cacheData.balances = balances;
-
-      cache = cacheData;
+      cacheData.time = parsedCacheData.time;
     } catch {
       console.log("catched", cache, cacheData);
       cacheData.balances = cache;
     }
     if (!Array.isArray(cacheData.balances)) {
-      console.log("not balances");
+      console.log("not balances", cacheData, cacheData.balances);
       return;
     }
 
@@ -98,26 +97,17 @@ function SomeTrackerHome(props) {
     //const expiry = new Date() - 1000 * 60 * 60 * 24 * 3;
     const expiry = new Date() - 1000 * 60 * 5;
     if (cacheTime >= expiry) {
+      console.log("not expired", cacheData);
       return cacheData.balances;
     }
   };
 
   const getBalances = (hardRefresh) => {
-    const totalacc = 0;
-    const totalReducer = (acc, item) => {
-      return acc + parseInt(item.value);
-    };
     const cache = getBalancesCache(true);
-    console.log(cache);
+    console.log("Get balances top cache", cache);
     setBalancesLoaded(false);
-    console.log(
-      "getting balances, if true, go to network",
-      getBalancesCache(true) == undefined,
-      getBalancesCache(true) && hardRefresh
-    );
 
-    if (!getBalancesCache(true) || hardRefresh) {
-      const networks = Object.entries(props.networks);
+    if (!cache || hardRefresh) {
       try {
         const portfolio = props.network.queryClient
           .getPortfolio(props.address, props.networks)
@@ -147,12 +137,9 @@ function SomeTrackerHome(props) {
         return;
       }
     } else {
-      const balances = getBalancesCache(true);
-      console.log("balances cachce", balances);
-      const newBalances = JSON.parse(balances);
-
-      const totalValue = newBalances.balances.reduce(totalReducer, totalacc);
-      setBalances(newBalances.balances);
+      console.log("balances from cache", cache);
+      const newBalances = cache;
+      setBalances(newBalances);
       setBalancesLoaded(true);
     }
   };
@@ -183,6 +170,14 @@ function SomeTrackerHome(props) {
       {Array.isArray(props.accounts) ? (
         <div>
           <p>You have {props.accounts.length} accounts saved</p>
+          <Button
+            variant={"primary"}
+            onClick={() => {
+              props.setAddress(false);
+            }}
+          >
+            Add a new account
+          </Button>
           {props.accounts.map((account) => {
             const styles = account == props.address ? "dark" : "outline-dark";
             return (

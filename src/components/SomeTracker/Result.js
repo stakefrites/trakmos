@@ -10,13 +10,21 @@ const Result = (props) => {
 
   if (props.balances !== undefined) {
     const realBalances = props.balances.map((balance) => {
-      const thisPrice = props.prices[balance.coinGeckoId].price;
-      totalValue += balance.total * thisPrice;
-      return {
-        ...balance,
-        price: thisPrice,
-        value: balance.total * thisPrice,
-      };
+      if (props.prices[balance.coinGeckoId] !== undefined) {
+        const thisPrice = props.prices[balance.coinGeckoId].price;
+        totalValue += balance.total * thisPrice;
+        return {
+          ...balance,
+          price: thisPrice,
+          value: balance.total * thisPrice,
+        };
+      } else {
+        return {
+          ...balance,
+          price: 0,
+          value: balance.total * 0,
+        };
+      }
     });
     return (
       <>

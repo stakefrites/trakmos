@@ -5,6 +5,7 @@ import _ from "lodash";
 import { uniqueArray } from "./Helpers.mjs";
 
 const Chain = async (data) => {
+  console.log("creating chain", data);
   const getChainData = () => {
     return axios
       .get("https://registry.cosmos.directory/" + data.name + "/chain")

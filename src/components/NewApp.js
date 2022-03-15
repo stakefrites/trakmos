@@ -152,6 +152,7 @@ const NewApp = (props) => {
     const isValid = Bech32.decode(newAddress);
     if (isValid) {
       setAddress(newAddress);
+      setNewAddress("");
     } else {
       setError("This is not a valid Bech32 address");
     }
@@ -237,6 +238,21 @@ const NewApp = (props) => {
               ) : (
                 <div className="mb-5 text-center">
                   <Button onClick={connect}>Connect Keplr</Button>
+                  <hr />
+                  <Form className="manual-address" onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3" controlId="formBasicEmail">
+                      <Form.Label>Enter any $COSMOS address</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={newAddress}
+                        onChange={handleManualAddress}
+                        placeholder="osmo1eh... or cosmos1eh..."
+                      />
+                    </Form.Group>
+                    <Button variant="primary" type="submit">
+                      Submit
+                    </Button>
+                  </Form>
                 </div>
               )}
             </div>
