@@ -157,5 +157,53 @@
     "testAddress": "cerberus1yxsmtnxdt6gxnaqrg0j0nudg7et2gqczd38dxa",
     "ownerAddress": "cerberusvaloper1tat2cy3f9djtq9z7ly262sqngcarvaktr0w78f",
     "authzSupport": true
+  },
+  {
+    "name": "persistence",
+    "restUrl": [
+      "https://rest.cosmos.directory/persistence",
+      "https://rest.core.persistence.one"
+    ],
+    "rpcUrl": [
+      "https://rpc.cosmos.directory/persistence",
+      "https://rpc.core.persistence.one"
+    ],
+    "authzSupport": true
+  },
+  {
+    "name": "bitsong",
+    "restUrl": [
+      "https://rest.cosmos.directory/bitsong",
+      "https://lcd-bitsong.itastakers.com"
+    ],
+    "rpcUrl": [
+      "https://rpc.cosmos.directory/bitsong",
+      "https://rpc-bitsong.itastakers.com"
+    ],
+    "authzSupport": true
+  },
+  {
+    "name": "evmos",
+    "restUrl": [
+      "https://rest.cosmos.directory/evmos",
+      "https://rest.bd.evmos.org:1317"
+    ],
+    "rpcUrl": [
+      "https://rpc.cosmos.directory/evmos",
+      "https://tendermint.bd.evmos.org:26657"
+    ],
+    "authzSupport": true
+  },
+  {
+    "name": "terra",
+    "restUrl": [
+      "https://rest.cosmos.directory/terra"
+    ],
+    "rpcUrl": [
+      "https://rpc.cosmos.directory/terra"
+    ],
+    "testAddress": "terra1rnszu7kumz5lmgdk3fv2pmzt3s8vhcddqep7d4",
+    "gasPrice": "0.015uluna",
+    "authzSupport": true
   }
 ]
