@@ -2,9 +2,7 @@
 
 [![publish](https://github.com/stakefrites/some-tracker/actions/workflows/publish.yml/badge.svg)](https://github.com/stakefrites/some-tracker/actions/workflows/publish.yml)
 
-REStake allows delegators to grant permission for a validator to compound their rewards, and provides a script validators can run to find their granted delegators and send the compounding transactions automatically.
-
-REStake is also a convenient staking tool, allowing you to claim and compound your rewards individually or in bulk. This can save transaction fees and time, and many more features are planned.
+Trackmos allows cosmos magic tokens holder to view all their balances via a simple UI that either connects to one Keplr account of a simple text input.
 
 [![](./docs/screenshot.png)](https://trackmos.stakefrites.co/)
 
