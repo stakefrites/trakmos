@@ -12,34 +12,30 @@ import { Spinner } from "react-bootstrap";
 
 import networksData from "../networks.json";
 
-function NetworkFinder() {
-  const [network, setNetwork] = useState(false);
-  const [networks, setNetworks] = useState([]);
-  const [isNetworkLoading, setIsNetworkLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [prices, setPrices] = useLocalStorage("prices");
-  //const [prices, setPrices] = useState();
-  const [pricesLoaded, setPricesLoaded] = useState(false);
+/*
 
   const getCache = (storageKey, valueKey, expireCache) => {
+    console.log("Getting cache", storageKey);
     const cache = localStorage.getItem(storageKey);
     if (!cache) {
+      console.log("no cache for this");
       return;
     }
 
     let cacheData = {};
     try {
-      cacheData = JSON.parse(cache);
-      cacheData.coingecko_id = storageKey;
+      cacheData = JSON.parse(cache).price;
+      //cacheData.coingecko_id = storageKey;
+      console.log("cache data in parse", cacheData);
     } catch {
       cacheData = cache;
     }
 
     if (!cacheData[valueKey]) {
-      return JSON.parse(cacheData);
+      return JSON.parse(cacheData).price;
     }
     if (!expireCache) {
-      return JSON.parse(cacheData);
+      return JSON.parse(cacheData).price;
     }
 
     const cacheTime = cacheData.time && new Date(cacheData.time);
@@ -48,14 +44,16 @@ function NetworkFinder() {
     //const expiry = new Date() - 1000 * 60 * 60 * 24 * 3;
     const expiry = new Date() - 1000 * 60 * 12;
     if (cacheTime >= expiry) {
-      return cacheData;
+      return cacheData.price;
     }
   };
 
-  const getAllCache = (arr, storageKey, valueKey, expireCache) => {
+  const getAllCache = (arr, valueKey, expireCache) => {
     const allCache = arr.map((item) => {
-      return getCache(item.coingecko_id, valueKey, expireCache);
+      let cachedInLoop = getCache(item.coingecko_id, valueKey, expireCache);
+      return cachedInLoop;
     });
+    console.log("compact, all cache", _.compact(allCache), allCache);
     if (allCache.includes(undefined)) {
       return false;
     } else {
@@ -63,15 +61,12 @@ function NetworkFinder() {
     }
   };
 
-  const getPrices = async (network, hardRefresh) => {
+  const getPrices = async (networks, hardRefresh) => {
+    const network = networks[0];
+
     setPricesLoaded(false);
-    const networksArray = Object.values(networks);
-    const cachedPrices = await getAllCache(
-      networksArray,
-      "prices",
-      "price",
-      true
-    );
+    const cachedPrices = await getAllCache(networks, "price", true);
+
     if (cachedPrices) {
       setPrices(cachedPrices);
       localStorage.setItem(
@@ -80,7 +75,7 @@ function NetworkFinder() {
       );
       setPricesLoaded(true);
     } else {
-      const pricesData = await network.queryClient.getPrice(networksArray);
+      const pricesData = await network.queryClient.getPrice(networks);
       pricesData.map((price) => {
         localStorage.setItem(
           price.coingecko_id,
@@ -88,12 +83,47 @@ function NetworkFinder() {
         );
       });
       setPrices(pricesData);
-      /*  localStorage.setItem(
+      localStorage.setItem(
         "prices",
         JSON.stringify({ prices: pricesData.prices, time: +new Date() })
-      ); */
+      );
       setPricesLoaded(true);
     }
+  };
+*/
+
+function NetworkFinder() {
+  const [networks, setNetworks] = useState([]);
+  const [isNetworkLoading, setIsNetworkLoading] = useState(true);
+  const [networkProgress, setNetworkProgress] = useState(0);
+  const [error, setError] = useState(false);
+  const [prices, setPrices] = useLocalStorage("prices", false);
+  //const [prices, setPrices] = useState();
+  const [pricesLoaded, setPricesLoaded] = useState(false);
+
+  const getPrices = async (networks, hardRefresh) => {
+    const network = networks[0];
+
+    setPricesLoaded(false);
+
+    const pricesData = await network.queryClient.getPrice(networks);
+    console.log(
+      "🚀 ~ file: NetworkFinder.js ~ line 110 ~ getPrices ~ pricesData",
+      pricesData
+    );
+    setPrices(pricesData);
+    pricesData.map((price) => {
+      localStorage.setItem(
+        price.coingecko_id,
+        JSON.stringify({ price: price, time: +new Date() })
+      );
+    });
+    setPrices(pricesData);
+    localStorage.setItem(
+      "prices",
+      JSON.stringify({ prices: pricesData.prices, time: +new Date() })
+    );
+    setPricesLoaded(true);
   };
 
   const getNetworks = async () => {
@@ -111,9 +141,13 @@ function NetworkFinder() {
     return _.compact(networks).reduce((a, v) => ({ ...a, [v.name]: v }), {});
   };
 
-  const changeNetwork = (network) => {
-    setNetwork(network);
+  const getAprs = async (networks) => {
+    const aprs = 0;
   };
+
+  /*   const changeNetwork = (network) => {
+    setNetwork(network);
+  }; */
 
   useEffect(() => {
     if (!Object.keys(networks).length) {
@@ -121,37 +155,25 @@ function NetworkFinder() {
       getNetworks().then((networks) => {
         setNetworks(networks);
         // setIsNetworkLoading(false);
+        return mapAsync(Object.values(networks), async (network) => {
+          const newData = await Network(network);
+          /*  const percent = networkProgress + networkIncrement;
+            console.log(percent, networkProgress);
+            setNetworkProgress(percent); */
+          return newData;
+        }).then((data) => {
+          setNetworks(data);
+          setNetworkProgress(100);
+          setIsNetworkLoading(false);
+          getPrices(data);
+          getAprs(data);
+          //setNetwork(network);
+        });
       });
     }
   }, [networks]);
 
-  useEffect(() => {
-    if (Object.keys(networks).length && !network) {
-      const networkName = Object.keys(networks)[0];
-      const data = networks[networkName];
-      if (!data) {
-        //setIsNetworkLoading(false);
-        return;
-      }
-      Network(data)
-        .then((network) => {
-          setNetwork(network);
-          getPrices(network);
-        })
-        .then(() => {
-          return mapAsync(Object.values(networks), async (network) => {
-            const newData = await Network(network);
-            return newData;
-          });
-        })
-        .then((data) => {
-          setNetworks(data);
-          setIsNetworkLoading(false);
-        });
-    }
-  }, [networks, network]);
-
-  if (isNetworkLoading) {
+  /* if (isNetworkLoading) {
     return (
       <div className="pt-5 text-center">
         <p> Initializing blockchain data...</p>
@@ -162,19 +184,23 @@ function NetworkFinder() {
         </Spinner>
       </div>
     );
-  }
+  } */
 
   if (error) {
     return <p>Loading failed</p>;
   }
 
   return (
-    <NewApp
-      prices={_.keyBy(prices, "coingecko_id")}
-      networks={networks}
-      network={network}
-      changeNetwork={changeNetwork}
-    />
+    <>
+      <NewApp
+        prices={_.keyBy(prices, "coingecko_id")}
+        isNetworkLoading={isNetworkLoading}
+        networks={networks}
+        networkProgress={networkProgress}
+        /* network={network} */
+        /* changeNetwork={changeNetwork} */
+      />
+    </>
   );
 }
 

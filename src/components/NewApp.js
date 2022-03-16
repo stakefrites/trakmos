@@ -3,7 +3,14 @@ import "./App.css";
 import React, { useEffect, useState, useRef } from "react";
 import _ from "lodash";
 
-import { Spinner, Container, Button, Badge, Form } from "react-bootstrap";
+import {
+  Spinner,
+  Container,
+  Button,
+  Badge,
+  Form,
+  ProgressBar,
+} from "react-bootstrap";
 
 import SomeTrackerHome from "./SomeTracker/SomeTrackerHome";
 import AlertMessage from "./modules/AlertMessage";
@@ -78,28 +85,30 @@ const NewApp = (props) => {
     if (!window.keplr) {
       setKeplr(false);
     } else {
-      connect();
       setKeplr(true);
+      if (props.networks.length > 0) {
+        console.log("network length", props);
+        connect();
+      }
     }
-  }, []);
+  }, [props.networks]);
 
   const connect = async () => {
-    if (!props.network.connected) {
+    console.log(props);
+    if (!props.networks[0].connected) {
       setError("Could not connect to any available API servers");
     }
-    const chainId = props.network.chainId;
+    const network = props.networks[0];
+    const chainId = network.chainId;
     try {
       await window.keplr.enable(chainId);
     } catch (e) {
-      await suggestChain(props.network, window);
+      await suggestChain(network, window);
     }
     if (window.getOfflineSigner) {
       const offlineSigner = await window.getOfflineSignerAuto(chainId);
       const key = await window.keplr.getKey(chainId);
-      const stargateClient = await props.network.signingClient(
-        offlineSigner,
-        key
-      );
+      const stargateClient = await network.signingClient(offlineSigner, key);
 
       const stargateAddress = await stargateClient.getAddress();
       setAddress(stargateAddress);
@@ -111,7 +120,8 @@ const NewApp = (props) => {
   };
 
   const reconsiderAddress = async () => {
-    const chainId = props.network.chainId;
+    const network = props.networks[0];
+    const chainId = network?.chainId;
     const key = await window.keplr.getKey(chainId);
     const address = key.bech32Address;
     setAddress(address);
@@ -205,22 +215,31 @@ const NewApp = (props) => {
                 </>
               ) : (
                 <div className="mb-5 text-center">
-                  <Button onClick={connect}>Connect Keplr</Button>
-                  <hr />
-                  <Form className="manual-address" onSubmit={handleSubmit}>
-                    <Form.Group className="mb-3" controlId="formBasicEmail">
-                      <Form.Label>Enter any $COSMOS address</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={newAddress}
-                        onChange={handleManualAddress}
-                        placeholder="osmo1eh... or cosmos1eh..."
-                      />
-                    </Form.Group>
-                    <Button variant="primary" type="submit">
-                      Submit
-                    </Button>
-                  </Form>
+                  {props.isNetworkLoading ? (
+                    <div className="pt-5 text-center">
+                      <p> Loading networks</p>
+                      <ProgressBar animated now={75} />
+                    </div>
+                  ) : (
+                    <>
+                      <Button onClick={connect}>Connect Keplr</Button>
+                      <hr />
+                      <Form className="manual-address" onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3" controlId="formBasicEmail">
+                          <Form.Label>Enter any $COSMOS address</Form.Label>
+                          <Form.Control
+                            type="text"
+                            value={newAddress}
+                            onChange={handleManualAddress}
+                            placeholder="osmo1eh... or cosmos1eh..."
+                          />
+                        </Form.Group>
+                        <Button variant="primary" type="submit">
+                          Submit
+                        </Button>
+                      </Form>
+                    </>
+                  )}
                 </div>
               )}
             </div>

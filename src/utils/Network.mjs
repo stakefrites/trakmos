@@ -60,7 +60,7 @@ const Network = async (data) => {
     symbol: chain.symbol,
     decimals: chain.decimals,
     image: chain.image,
-    coinGeckoId: chain.coinGeckoId,
+    coingecko_id: chain.coingecko_id,
     testAddress: data.testAddress,
     restUrl: queryClient.restUrl,
     rpcUrl: queryClient.rpcUrl,

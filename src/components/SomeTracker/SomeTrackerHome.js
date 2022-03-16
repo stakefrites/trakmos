@@ -31,19 +31,23 @@ function SomeTrackerHome(props) {
     refresh();
   }, [props.address]);
 
-  function refresh(hardRefresh) {
+  function refresh() {
     getBalances();
     refreshInterval();
   }
   function hardRefresh() {
-    localStorage.removeItem("balances");
-    setBalances([]);
+    console.log("HR");
     setBalancesLoaded(false);
-    refresh(true);
+    localStorage.removeItem("balances");
+    getBalances(true);
+    //setBalances([]);
+    //setBalancesLoaded(false);
+    refresh();
   }
 
   function refreshInterval() {
     const interval = setInterval(() => {
+      getBalances();
       //Insert a function to run at each X time
     }, 300_000);
     setStateInterval(interval);
@@ -96,23 +100,21 @@ function SomeTrackerHome(props) {
     const cache = getBalancesCache(true);
     setBalancesLoaded(false);
 
+    const myAccounts = props.accounts;
+    const newAccounts = myAccounts
+      ? [props.address, ...myAccounts]
+      : [props.address];
+    props.setAccounts(_.uniq(newAccounts));
+
     if (!cache || hardRefresh) {
       try {
-        const portfolio = props.network.queryClient
+        const portfolio = props.networks[0].queryClient
           .getPortfolio(props.address, props.networks)
           .then((data) => {
             localStorage.setItem(
               props.address,
               JSON.stringify({ balances: data, time: +new Date() })
             );
-
-            const myAccounts = props.accounts.myAccounts;
-            const newAccounts = myAccounts
-              ? [props.address, ...myAccounts]
-              : [props.address];
-
-            localStorage.setItem("savedAccounts", JSON.stringify(newAccounts));
-            props.setAccounts(_.uniq(newAccounts));
             setBalances(data);
             setBalancesLoaded(true);
           });
@@ -150,18 +152,18 @@ function SomeTrackerHome(props) {
           Refresh Balances <ArrowClockwise color="black" size={16} />
         </Button>
       </p>
+      <Button
+        variant={"primary"}
+        onClick={() => {
+          props.setAddress(false);
+        }}
+      >
+        Add a new account
+      </Button>
       {Array.isArray(props.accounts) ? (
         <div>
           <p>You have {props.accounts.length} accounts saved</p>
-          <Button
-            variant={"primary"}
-            onClick={() => {
-              props.setAddress(false);
-            }}
-          >
-            Add a new account
-          </Button>
-          {props.accounts.map((account) => {
+          {props.accounts?.map((account) => {
             const styles = account == props.address ? "dark" : "outline-dark";
             return (
               <div key={account}>
@@ -180,7 +182,7 @@ function SomeTrackerHome(props) {
       ) : (
         ""
       )}
-      <Result balances={balances} {...props} />
+      {balancesLoaded ? <Result balances={balances} {...props} /> : ""}
     </>
   );
 }

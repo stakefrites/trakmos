@@ -240,7 +240,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
   }
 
   const getChainApr = async (chain) => {
-    const client = await makeClient();
+    const client = await makeClient(chain.rpcUrl);
     const pool = await client.staking.pool();
     const supply = await client.bank.supplyOf(chain.denom);
     const bondedTokens = pool.pool.bondedTokens;
@@ -254,6 +254,13 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       );
       const apr = aprRequest.data.rate;
       return apr;
+      /*   } else if (
+      chain.chainId.startsWith("evmos") ||
+      chain.chainId.startsWith("core") ||
+      chain.chainId.startsWith("colombus") ||
+      chain.chainId.startsWith("cerberusa")
+    ) {
+      return 0; */
     } else {
       const req = await client.mint.inflation();
       const baseInflation = req.toFloatApproximation();
@@ -332,7 +339,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     const bech = Bech32.decode(a);
     const portfolio = [];
     for (let chain of chains) {
-      const { decimals, prefix, coinGeckoId, denom, name } = chain;
+      const { decimals, prefix, coingecko_id, denom, name } = chain;
 
       const chainAddress = Bech32.encode(prefix, bech.data);
 
@@ -387,7 +394,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
         rewards,
         staked: parseFloat(stakedBalance),
         liquid: parseFloat(liquidBalance),
-        coinGeckoId,
+        coingecko_id,
         total,
         chainAddress,
       };

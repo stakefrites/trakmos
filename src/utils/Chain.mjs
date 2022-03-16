@@ -18,9 +18,7 @@ const Chain = async (data) => {
   };
 
   const chainData = await getChainData();
-  const newtorksJsonRpc = data.apis.rpc.map((el) => ({ address: el }));
   const tokenData = await getTokenData();
-  const allRpc = _.compact(newtorksJsonRpc.concat(chainData.apis.rpc));
 
   const getChainInfo = () => {
     return {
@@ -42,24 +40,13 @@ const Chain = async (data) => {
       image:
         data.image ||
         (asset.logo_URIs && (asset.logo_URIs.png || asset.logo_URIs.svg)),
-      coinGeckoId: asset.coingecko_id,
+      coingecko_id: asset.coingecko_id,
     };
   };
 
   const { prettyName, chainId, prefix, slip44 } = getChainInfo();
 
-  const { denom, symbol, decimals, image, coinGeckoId } = getTokenInfo();
-  const newChainData = {
-    ...chainData,
-    apis: {
-      rpc: allRpc,
-    },
-    coinGeckoId,
-    decimals,
-    image,
-    denom,
-    symbol,
-  };
+  const { denom, symbol, decimals, image, coingecko_id } = getTokenInfo();
 
   return {
     tokenData: getTokenData(),
@@ -72,8 +59,7 @@ const Chain = async (data) => {
     symbol,
     decimals,
     image,
-    coinGeckoId,
-    chainData: newChainData,
+    coingecko_id,
     tokenData,
   };
 };
