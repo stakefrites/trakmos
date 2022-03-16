@@ -11,6 +11,8 @@ import Footer from "./modules/Footer";
 import Header from "./modules/Header";
 import About from "./modules/About";
 
+import { useLocalStorage } from "../hooks/hooks";
+
 import { Bech32 } from "@cosmjs/encoding";
 
 function useUpdateEffect(effect, dependencies = []) {
@@ -61,7 +63,7 @@ const NewApp = (props) => {
   const [error, setError] = useState();
   const [stargateClient, setStargateClient] = useState();
   const [keplr, setKeplr] = useState();
-  const [accounts, setAccounts] = useState([]);
+  const [accounts, setAccounts] = useLocalStorage("myAccounts", []);
   const [newAddress, setNewAddress] = useState("");
   const [currentWallet, setCurrentWallet] = useState();
 
@@ -79,8 +81,6 @@ const NewApp = (props) => {
   }, [keplr]);
 
   useEffect(() => {
-    getAccounts();
-    getAccounts();
     window.addEventListener("keplr_keystorechange", reconsiderAddress);
     if (!window.keplr) {
       setKeplr(false);
@@ -97,17 +97,12 @@ const NewApp = (props) => {
     const chainId = props.network.chainId;
     try {
       await window.keplr.enable(chainId);
-      console.log("Keplr enables");
     } catch (e) {
-      console.log("enable error signer");
-      console.log(e.message, e);
       await suggestChain(props.network, window);
     }
     if (window.getOfflineSigner) {
-      console.log("offline signer");
       const offlineSigner = await window.getOfflineSignerAuto(chainId);
       const key = await window.keplr.getKey(chainId);
-      console.log(key, offlineSigner, Bech32.encode(props.network.prefix, key));
       const stargateClient = await props.network.signingClient(
         offlineSigner,
         key
@@ -118,33 +113,16 @@ const NewApp = (props) => {
       setStargateClient(stargateClient);
       setError(false);
       if (address !== false) {
-        console.log("address before balances", address);
         getBalances();
       }
     }
   };
 
   const reconsiderAddress = async () => {
-    console.log("reconsidering address");
     const chainId = props.network.chainId;
     const key = await window.keplr.getKey(chainId);
-    console.log("trackmos address", Bech32.encode("trackmos", key));
-
     const address = key.bech32Address;
-    const newAccounts = _.uniq([...accounts].push(address));
-    //setAccounts(newAccounts);
-    localStorage.setItem("savedAccounts", newAccounts);
     setAddress(address);
-  };
-
-  const getAccounts = () => {
-    const currentAccounts = localStorage.getItem("savedAccounts");
-    console.log("current accounts", currentAccounts);
-    if (currentAccounts) {
-      const myAccounts = JSON.parse(currentAccounts);
-      console.log("you have accounts", myAccounts);
-      setAccounts(_.uniq(myAccounts));
-    }
   };
 
   const handleSubmit = (e) => {
@@ -161,8 +139,6 @@ const NewApp = (props) => {
   const handleManualAddress = (e) => {
     setNewAddress(e.target.value);
   };
-
-  console.log(props.prices);
 
   return (
     <>
