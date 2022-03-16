@@ -57,23 +57,29 @@ const Result = (props) => {
               </thead>
               <tbody>
                 {realBalances.map((bal) => {
-                  return (
-                    <tr key={bal.chainAddress}>
-                      <td>{currency(bal.price, { precision: 3 }).format()}</td>
-                      <td width="auto">
-                        <img
-                          src={_.keyBy(props.networks, "name")[bal.name].image}
-                          height="30"
-                          width="30"
-                        />
-                      </td>
-                      <td>{bal.liquid}</td>
-                      <td>{bal.staked}</td>
-                      <td>{bal.rewards.toFixed(2)}</td>
-                      <td>{bal.total.toFixed(2)}</td>
-                      <td>{currency(bal.value).format()}</td>
-                    </tr>
-                  );
+                  if (bal.total > 0) {
+                    return (
+                      <tr key={bal.chainAddress}>
+                        <td>
+                          {currency(bal.price, { precision: 3 }).format()}
+                        </td>
+                        <td width="auto">
+                          <img
+                            src={
+                              _.keyBy(props.networks, "name")[bal.name].image
+                            }
+                            height="30"
+                            width="30"
+                          />
+                        </td>
+                        <td>{bal.liquid}</td>
+                        <td>{bal.staked}</td>
+                        <td>{bal.rewards.toFixed(2)}</td>
+                        <td>{bal.total.toFixed(2)}</td>
+                        <td>{currency(bal.value).format()}</td>
+                      </tr>
+                    );
+                  }
                 })}
               </tbody>
             </Table>
