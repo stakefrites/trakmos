@@ -17,7 +17,6 @@ function useUpdateEffect(effect, dependencies = []) {
 }
 
 function SomeTrackerHome(props) {
-  console.log("new some tracker reaload", props);
   const [balances, setBalances] = useState();
   const [balancesLoaded, setBalancesLoaded] = useState(false);
   const [interval, setStateInterval] = useState();
@@ -29,7 +28,6 @@ function SomeTrackerHome(props) {
   }, []);
 
   useEffect(() => {
-    console.log("effect hook for balances", props.address);
     refresh();
   }, [props.address]);
 
@@ -38,7 +36,6 @@ function SomeTrackerHome(props) {
     refreshInterval();
   }
   function hardRefresh() {
-    console.log("HR address", props.address);
     localStorage.removeItem("balances");
     setBalances([]);
     setBalancesLoaded(false);
@@ -62,27 +59,21 @@ function SomeTrackerHome(props) {
 
   const getBalancesCache = (expireCache) => {
     const cache = localStorage.getItem(props.address);
-    console.log("pre parsed balance cache", cache, props);
 
     if (!cache) {
-      console.log("not cache");
       return;
     }
 
     let cacheData = {};
     try {
       const parsedCacheData = JSON.parse(cache);
-      console.log("parsed cache", parsedCacheData);
       const { balances } = parsedCacheData;
-      console.log("parsed balances", balances);
       cacheData.balances = balances;
       cacheData.time = parsedCacheData.time;
     } catch {
-      console.log("catched", cache, cacheData);
       cacheData.balances = cache;
     }
     if (!Array.isArray(cacheData.balances)) {
-      console.log("not balances", cacheData, cacheData.balances);
       return;
     }
 
@@ -97,14 +88,12 @@ function SomeTrackerHome(props) {
     //const expiry = new Date() - 1000 * 60 * 60 * 24 * 3;
     const expiry = new Date() - 1000 * 60 * 5;
     if (cacheTime >= expiry) {
-      console.log("not expired", cacheData);
       return cacheData.balances;
     }
   };
 
   const getBalances = (hardRefresh) => {
     const cache = getBalancesCache(true);
-    console.log("Get balances top cache", cache);
     setBalancesLoaded(false);
 
     if (!cache || hardRefresh) {
@@ -112,7 +101,6 @@ function SomeTrackerHome(props) {
         const portfolio = props.network.queryClient
           .getPortfolio(props.address, props.networks)
           .then((data) => {
-            console.log(data);
             localStorage.setItem(
               props.address,
               JSON.stringify({ balances: data, time: +new Date() })
@@ -120,12 +108,6 @@ function SomeTrackerHome(props) {
             const newAccounts = props.accounts
               ? [props.address, ...props.accounts]
               : [props.address];
-            console.log(
-              "ACCOUNTS PROPS & NEW ACCOUNTS",
-              props.accounts,
-              props.address,
-              newAccounts
-            );
             localStorage.setItem("savedAccounts", JSON.stringify(newAccounts));
             props.setAccounts(_.uniq(newAccounts));
             setBalances(data);
@@ -137,7 +119,6 @@ function SomeTrackerHome(props) {
         return;
       }
     } else {
-      console.log("balances from cache", cache);
       const newBalances = cache;
       setBalances(newBalances);
       setBalancesLoaded(true);

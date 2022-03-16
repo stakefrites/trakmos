@@ -57,7 +57,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
    *
    * @returns QueryClient with necessary extensions
    */
-  const makeClient = async (rpcUrl) => {
+  const makeClient = async (rpc) => {
     const tmClient = await Tendermint34Client.connect(rpcUrl);
     return CosmjsQueryClient.withExtensions(
       tmClient,
@@ -236,17 +236,16 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
       console.log("Aggregate Error", promis);
       return false;
     }
-    console.log("promiseAny", promis);
     return promis;
   }
 
-  const getChainApr = async (denom) => {
+  const getChainApr = async (chain) => {
     const client = await makeClient();
     const pool = await client.staking.pool();
-    const supply = await client.bank.supplyOf(denom);
+    const supply = await client.bank.supplyOf(chain.denom);
     const bondedTokens = pool.pool.bondedTokens;
     const totalSupply = supply.amount;
-    if (chainId.startsWith("osmosis")) {
+    if (chain.chainId.startsWith("osmosis")) {
       const apr = await osmosisApr(totalSupply, bondedTokens);
       return apr;
     } else if (chainId.startsWith("sifchain")) {
@@ -285,21 +284,6 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     const baseInflation = yearMintingProvision / totalSupply;
     const bondedRatio = bondedTokens / totalSupply;
     const apr = baseInflation / bondedRatio;
-    console.log(
-      params,
-      epochs,
-      mintingEpochProvision,
-      epochDuration,
-      yearMintingProvision,
-      baseInflation,
-      bondedRatio,
-      apr,
-      "getting osmosis apr",
-      epochProvisions,
-      osmosisEpochs,
-      mintParams,
-      apr
-    );
     return apr;
   };
   const getApy = async (validators, denom) => {
@@ -315,7 +299,6 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
   };
 
   const getPrice = async (chains) => {
-    console.log("QUEEERY CLIENT: chains in get price before map", chains);
     const asyncs = await mapAsync(chains, (chain) => {
       const { coingecko_id } = chain;
       if (coingecko_id !== undefined) {
@@ -328,15 +311,12 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
             },
           }
         );
-        console.log("GetPrice in the coingecko return", datarr);
         return datarr;
       } else {
         return {};
       }
     });
-    console.log("price asyncs", asyncs);
     const mappedRequest = asyncs.map((price, i) => {
-      console.log("mapping request", price, i, chains);
       const configChain = chains[i];
       return {
         price:
@@ -345,7 +325,6 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
           price.status === 200 ? configChain.coingecko_id : configChain.name,
       };
     });
-    console.log("asyncs", asyncs, "mapped", mappedRequest);
     return mappedRequest;
   };
 
@@ -353,17 +332,26 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     const bech = Bech32.decode(a);
     const portfolio = [];
     for (let chain of chains) {
+      console.log(
+        "🚀 ~ file: QueryClient.mjs ~ line 338 ~ getPortfolio ~ chain",
+        chain
+      );
       const { decimals, prefix, coinGeckoId, denom, name } = chain;
-      console.log("chain", chain);
       const chainAddress = Bech32.encode(prefix, bech.data);
+      console.log(
+        "🚀 ~ file: QueryClient.mjs ~ line 341 ~ getPortfolio ~ chainAddress",
+        chainAddress
+      );
       try {
         const client = await makeClient(chain.queryClient.rpcUrl);
-        console.log("the client", client);
+        console.log(
+          "🚀 ~ file: QueryClient.mjs ~ line 343 ~ getPortfolio ~ client",
+          client
+        );
         const rewardsReq = await client.distribution.delegationTotalRewards(
           chainAddress
         );
 
-        console.log("rewards req", rewardsReq);
         const liquid = await client.bank.allBalances(chainAddress);
         let staked;
         try {
@@ -383,13 +371,11 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
           rewardsReq.rewards.length == 0
             ? 0
             : rewardsReq.rewards.reduce(rewardsReducer, rewardsAcc);
-        console.log(chainAddress, "Total staked", totalTokensStaked);
 
         const liquidBal = liquid.find((val) =>
           val.denom == chain.denom ? true : false
         );
         const rewards = totalTokensRewards / Math.pow(10, decimals + 18);
-        console.log(rewards, Math.pow(10, decimals + 18), totalTokensRewards);
 
         const stakedBalance = (
           totalTokensStaked / Math.pow(10, decimals)
@@ -399,7 +385,6 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
           : 0;
         const total =
           rewards + parseFloat(stakedBalance) + parseFloat(liquidBalance);
-        console.log(total);
         const data = {
           name: chain.name,
           rewards,
@@ -409,14 +394,12 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
           total,
           chainAddress,
         };
-        console.log("pushing", data);
         portfolio.push(data);
       } catch (e) {
         console.log(e);
         return;
       }
     }
-    console.log("WERE RETURNIN FOLIO", portfolio);
     return portfolio;
   };
 
@@ -424,6 +407,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     connected: !!rpcUrl && !!restUrl,
     rpcUrl,
     restUrl,
+    getChainApr,
     getAllValidators,
     getPrice,
     getValidators,
