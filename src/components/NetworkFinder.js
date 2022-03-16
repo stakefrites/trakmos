@@ -6,6 +6,8 @@ import Network from "../utils/Network.mjs";
 import { overrideNetworks, mapAsync } from "../utils/Helpers.mjs";
 import NewApp from "./NewApp";
 
+import { useLocalStorage } from "../hooks/hooks.js";
+
 import { Spinner } from "react-bootstrap";
 
 import networksData from "../networks.json";
@@ -15,7 +17,8 @@ function NetworkFinder() {
   const [networks, setNetworks] = useState([]);
   const [isNetworkLoading, setIsNetworkLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [prices, setPrices] = useState();
+  const [prices, setPrices] = useLocalStorage("prices");
+  //const [prices, setPrices] = useState();
   const [pricesLoaded, setPricesLoaded] = useState(false);
 
   const getCache = (storageKey, valueKey, expireCache) => {
@@ -23,23 +26,19 @@ function NetworkFinder() {
     if (!cache) {
       return;
     }
-    console.log("parsing cachce", storageKey, valueKey, cache);
 
     let cacheData = {};
     try {
       cacheData = JSON.parse(cache);
       cacheData.coingecko_id = storageKey;
-      console.log("parsing cachce", storageKey, valueKey, cache, cacheData);
     } catch {
       cacheData = cache;
     }
 
     if (!cacheData[valueKey]) {
-      console.log("not value key", JSON.parse(cacheData));
       return JSON.parse(cacheData);
     }
     if (!expireCache) {
-      console.log("cached not expired, returning cache data", cacheData);
       return JSON.parse(cacheData);
     }
 
@@ -49,7 +48,6 @@ function NetworkFinder() {
     //const expiry = new Date() - 1000 * 60 * 60 * 24 * 3;
     const expiry = new Date() - 1000 * 60 * 12;
     if (cacheTime >= expiry) {
-      console.log("stilled cached", cacheData);
       return cacheData;
     }
   };
@@ -58,7 +56,6 @@ function NetworkFinder() {
     const allCache = arr.map((item) => {
       return getCache(item.coingecko_id, valueKey, expireCache);
     });
-    console.log("allcache", allCache);
     if (allCache.includes(undefined)) {
       return false;
     } else {
@@ -75,9 +72,7 @@ function NetworkFinder() {
       "price",
       true
     );
-    console.log("prices cache'", cachedPrices);
     if (cachedPrices) {
-      console.log("Settiong prices cachce", cachedPrices);
       setPrices(cachedPrices);
       localStorage.setItem(
         "prices",
@@ -86,7 +81,6 @@ function NetworkFinder() {
       setPricesLoaded(true);
     } else {
       const pricesData = await network.queryClient.getPrice(networksArray);
-      console.log("Settiong prices NOCACHE", pricesData);
       pricesData.map((price) => {
         localStorage.setItem(
           price.coingecko_id,
@@ -94,10 +88,10 @@ function NetworkFinder() {
         );
       });
       setPrices(pricesData);
-      localStorage.setItem(
+      /*  localStorage.setItem(
         "prices",
         JSON.stringify({ prices: pricesData.prices, time: +new Date() })
-      );
+      ); */
       setPricesLoaded(true);
     }
   };
@@ -132,12 +126,7 @@ function NetworkFinder() {
   }, [networks]);
 
   useEffect(() => {
-    console.log(
-      "Networks, Network use Effect, navigate",
-      Object.keys(networks).length && !network
-    );
     if (Object.keys(networks).length && !network) {
-      console.log("Network not setted");
       const networkName = Object.keys(networks)[0];
       const data = networks[networkName];
       if (!data) {
@@ -146,7 +135,6 @@ function NetworkFinder() {
       }
       Network(data)
         .then((network) => {
-          console.log("Set Network data", data);
           setNetwork(network);
           getPrices(network);
         })
@@ -157,7 +145,6 @@ function NetworkFinder() {
           });
         })
         .then((data) => {
-          console.log("new improved Data", data);
           setNetworks(data);
           setIsNetworkLoading(false);
         });
