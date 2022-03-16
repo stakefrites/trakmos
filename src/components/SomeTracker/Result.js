@@ -8,7 +8,7 @@ import _ from "lodash";
 const Result = (props) => {
   let totalValue = 0;
 
-  if (props.balances !== undefined) {
+  if (props.balances !== undefined && props.balances) {
     const realBalances = props.balances.map((balance) => {
       console.log("mapping balances", props.prices, balance);
       if (

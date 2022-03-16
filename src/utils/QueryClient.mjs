@@ -58,7 +58,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
    * @returns QueryClient with necessary extensions
    */
   const makeClient = async (rpc) => {
-    const tmClient = await Tendermint34Client.connect(rpcUrl);
+    const tmClient = await Tendermint34Client.connect(rpc);
     return CosmjsQueryClient.withExtensions(
       tmClient,
       setupStakingExtension,
@@ -248,7 +248,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     if (chain.chainId.startsWith("osmosis")) {
       const apr = await osmosisApr(totalSupply, bondedTokens);
       return apr;
-    } else if (chainId.startsWith("sifchain")) {
+    } else if (chain.chainId.startsWith("sifchain")) {
       const aprRequest = await axios.get(
         "https://data.sifchain.finance/beta/validator/stakingRewards"
       );
@@ -332,73 +332,66 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     const bech = Bech32.decode(a);
     const portfolio = [];
     for (let chain of chains) {
-      console.log(
-        "🚀 ~ file: QueryClient.mjs ~ line 338 ~ getPortfolio ~ chain",
-        chain
-      );
       const { decimals, prefix, coinGeckoId, denom, name } = chain;
+
       const chainAddress = Bech32.encode(prefix, bech.data);
-      console.log(
-        "🚀 ~ file: QueryClient.mjs ~ line 341 ~ getPortfolio ~ chainAddress",
+
+      const client = await makeClient(chain.rpcUrl);
+      let all = await client.bank.totalSupply();
+
+      let liquid;
+      try {
+        liquid = await await client.bank.allBalances(chainAddress);
+      } catch (error) {
+        console.log("Error in all balances", error);
+        liquid = { delegationResponses: [] };
+      }
+      const rewardsReq = await client.distribution.delegationTotalRewards(
         chainAddress
       );
+
+      let staked;
       try {
-        const client = await makeClient(chain.queryClient.rpcUrl);
-        console.log(
-          "🚀 ~ file: QueryClient.mjs ~ line 343 ~ getPortfolio ~ client",
-          client
-        );
-        const rewardsReq = await client.distribution.delegationTotalRewards(
-          chainAddress
-        );
-
-        const liquid = await client.bank.allBalances(chainAddress);
-        let staked;
-        try {
-          staked = await client.staking.delegatorDelegations(chainAddress);
-        } catch (error) {
-          staked = { delegationResponses: [] };
-        }
-        const stakingAcc = 0;
-        const rewardsAcc = 0;
-
-        const totalTokensStaked =
-          staked.delegationResponses.length == 0
-            ? 0
-            : staked.delegationResponses.reduce(stakedReducer, stakingAcc);
-
-        const totalTokensRewards =
-          rewardsReq.rewards.length == 0
-            ? 0
-            : rewardsReq.rewards.reduce(rewardsReducer, rewardsAcc);
-
-        const liquidBal = liquid.find((val) =>
-          val.denom == chain.denom ? true : false
-        );
-        const rewards = totalTokensRewards / Math.pow(10, decimals + 18);
-
-        const stakedBalance = (
-          totalTokensStaked / Math.pow(10, decimals)
-        ).toFixed(2);
-        const liquidBalance = liquidBal
-          ? (parseFloat(liquidBal.amount) / Math.pow(10, decimals)).toFixed(2)
-          : 0;
-        const total =
-          rewards + parseFloat(stakedBalance) + parseFloat(liquidBalance);
-        const data = {
-          name: chain.name,
-          rewards,
-          staked: parseFloat(stakedBalance),
-          liquid: parseFloat(liquidBalance),
-          coinGeckoId,
-          total,
-          chainAddress,
-        };
-        portfolio.push(data);
-      } catch (e) {
-        console.log(e);
-        return;
+        staked = await client.staking.delegatorDelegations(chainAddress);
+      } catch (error) {
+        staked = { delegationResponses: [] };
       }
+      const stakingAcc = 0;
+      const rewardsAcc = 0;
+
+      const totalTokensStaked =
+        staked.delegationResponses.length == 0
+          ? 0
+          : staked.delegationResponses.reduce(stakedReducer, stakingAcc);
+
+      const totalTokensRewards =
+        rewardsReq.rewards.length == 0
+          ? 0
+          : rewardsReq.rewards.reduce(rewardsReducer, rewardsAcc);
+
+      const liquidBal = liquid.find((val) =>
+        val.denom == denom ? true : false
+      );
+      const rewards = totalTokensRewards / Math.pow(10, decimals + 18);
+
+      const stakedBalance = (
+        totalTokensStaked / Math.pow(10, decimals)
+      ).toFixed(2);
+      const liquidBalance = liquidBal
+        ? (parseFloat(liquidBal.amount) / Math.pow(10, decimals)).toFixed(2)
+        : 0;
+      const total =
+        rewards + parseFloat(stakedBalance) + parseFloat(liquidBalance);
+      const data = {
+        name: chain.name,
+        rewards,
+        staked: parseFloat(stakedBalance),
+        liquid: parseFloat(liquidBalance),
+        coinGeckoId,
+        total,
+        chainAddress,
+      };
+      portfolio.push(data);
     }
     return portfolio;
   };

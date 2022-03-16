@@ -68,14 +68,7 @@ const NewApp = (props) => {
   const [currentWallet, setCurrentWallet] = useState();
 
   useUpdateEffect(() => {
-    console.log("Keplr use effect");
     if (!keplr && window.keplr) {
-      console.log(
-        "Keplr use effect !keplr && window.keplr ",
-        keplr,
-        window.keplr,
-        "Setting Keplr to true"
-      );
       setKeplr(true);
     }
   }, [keplr]);
@@ -113,7 +106,6 @@ const NewApp = (props) => {
       setStargateClient(stargateClient);
       setError(false);
       if (address !== false) {
-        getBalances();
       }
     }
   };

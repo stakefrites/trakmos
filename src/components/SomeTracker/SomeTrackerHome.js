@@ -105,9 +105,12 @@ function SomeTrackerHome(props) {
               props.address,
               JSON.stringify({ balances: data, time: +new Date() })
             );
-            const newAccounts = props.accounts
-              ? [props.address, ...props.accounts]
+
+            const myAccounts = props.accounts.myAccounts;
+            const newAccounts = myAccounts
+              ? [props.address, ...myAccounts]
               : [props.address];
+
             localStorage.setItem("savedAccounts", JSON.stringify(newAccounts));
             props.setAccounts(_.uniq(newAccounts));
             setBalances(data);
@@ -136,7 +139,6 @@ function SomeTrackerHome(props) {
       </div>
     );
   }
-
   return (
     <>
       <p className="text-center">
