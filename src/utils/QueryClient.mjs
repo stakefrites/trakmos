@@ -14,6 +14,22 @@ import Chain from "./Chain.mjs";
 import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
 import { Bech32 } from "@cosmjs/encoding";
 
+function parseCommissionRate(validator) {
+  return (
+    parseInt(validator.commission.commission_rates.rate) / 1000000000000000000
+  );
+}
+
+function duration(epochs, epochIdentifier) {
+  const epoch = epochs.find((epoch) => epoch.identifier === epochIdentifier);
+  if (!epoch) {
+    return 0;
+  }
+
+  // Actually, the date type of golang protobuf is returned by the unit of seconds.
+  return parseInt(epoch.duration.replace("s", ""));
+}
+
 const QueryClient = async (chainId, rpcUrls, restUrls) => {
   const rpcUrl = await findAvailableUrl(
     Array.isArray(rpcUrls) ? rpcUrls : [rpcUrls],
@@ -223,6 +239,80 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     console.log("promiseAny", promis);
     return promis;
   }
+
+  const getChainApr = async (denom) => {
+    const client = await makeClient();
+    const pool = await client.staking.pool();
+    const supply = await client.bank.supplyOf(denom);
+    const bondedTokens = pool.pool.bondedTokens;
+    const totalSupply = supply.amount;
+    if (chainId.startsWith("osmosis")) {
+      const apr = await osmosisApr(totalSupply, bondedTokens);
+      return apr;
+    } else if (chainId.startsWith("sifchain")) {
+      const aprRequest = await axios.get(
+        "https://data.sifchain.finance/beta/validator/stakingRewards"
+      );
+      const apr = aprRequest.data.rate;
+      return apr;
+    } else {
+      const req = await client.mint.inflation();
+      const baseInflation = req.toFloatApproximation();
+      const ratio = bondedTokens / totalSupply;
+      const apr = baseInflation / ratio;
+      return apr;
+    }
+  };
+
+  const osmosisApr = async (totalSupply, bondedTokens) => {
+    const mintParams = await axios.get(
+      restUrl + "/osmosis/mint/v1beta1/params"
+    );
+    const osmosisEpochs = await axios.get(
+      restUrl + "/osmosis/epochs/v1beta1/epochs"
+    );
+    const epochProvisions = await axios.get(
+      restUrl + "/osmosis/mint/v1beta1/epoch_provisions"
+    );
+    const { params } = mintParams.data;
+    const { epochs } = osmosisEpochs.data;
+    const { epoch_provisions } = epochProvisions.data;
+    const mintingEpochProvision =
+      parseFloat(params.distribution_proportions.staking) * epoch_provisions;
+    const epochDuration = duration(epochs, params.epoch_identifier);
+    const yearMintingProvision =
+      (mintingEpochProvision * (365 * 24 * 3600)) / epochDuration;
+    const baseInflation = yearMintingProvision / totalSupply;
+    const bondedRatio = bondedTokens / totalSupply;
+    const apr = baseInflation / bondedRatio;
+    console.log(
+      params,
+      epochs,
+      mintingEpochProvision,
+      epochDuration,
+      yearMintingProvision,
+      baseInflation,
+      bondedRatio,
+      apr,
+      "getting osmosis apr",
+      epochProvisions,
+      osmosisEpochs,
+      mintParams,
+      apr
+    );
+    return apr;
+  };
+  const getApy = async (validators, denom) => {
+    const periodPerYear = 365;
+    const chainApr = await getChainApr(denom);
+    let validatorApy = {};
+    for (const [address, validator] of Object.entries(validators)) {
+      const realApr = chainApr * (1 - parseCommissionRate(validator));
+      const apy = (1 + realApr / periodPerYear) ** periodPerYear - 1;
+      validatorApy[address] = apy;
+    }
+    return validatorApy;
+  };
 
   const getPrice = async (chains) => {
     console.log("QUEEERY CLIENT: chains in get price before map", chains);
