@@ -123,7 +123,7 @@ const NewApp = (props) => {
     const network = props.networks[0];
     const chainId = network?.chainId;
     const key = await window.keplr.getKey(chainId);
-    const address = key.bech32Address;
+    const address = Bech32.encode("trackmos", key.address);
     setAddress(address);
   };
 

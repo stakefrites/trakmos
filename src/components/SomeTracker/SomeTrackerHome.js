@@ -4,6 +4,8 @@ import { Spinner, Button } from "react-bootstrap";
 import { ArrowClockwise } from "react-bootstrap-icons";
 import _ from "lodash";
 
+import { Bech32 } from "@cosmjs/encoding";
+
 function useUpdateEffect(effect, dependencies = []) {
   const isInitialMount = useRef(true);
 
@@ -96,15 +98,21 @@ function SomeTrackerHome(props) {
     }
   };
 
-  const getBalances = (hardRefresh) => {
-    const cache = getBalancesCache(true);
-    setBalancesLoaded(false);
+  const saveAccounts = (address) => {
+    const decodedAddress = Bech32.decode(address);
+    const trackAddress = Bech32.encode("trackmos", decodedAddress.data);
 
     const myAccounts = props.accounts;
     const newAccounts = myAccounts
-      ? [props.address, ...myAccounts]
-      : [props.address];
+      ? [trackAddress, ...myAccounts]
+      : [trackAddress];
     props.setAccounts(_.uniq(newAccounts));
+  };
+
+  const getBalances = (hardRefresh) => {
+    const cache = getBalancesCache(true);
+    setBalancesLoaded(false);
+    saveAccounts(props.address);
 
     if (!cache || hardRefresh) {
       try {
