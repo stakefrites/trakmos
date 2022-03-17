@@ -7,7 +7,7 @@ const ManualAddress = (props) => {
   return (
     <Card>
       <Card.Body>
-        {keplr ? (
+        {props.keplr ? (
           <>
             <Button onClick={props.connect}>Connect Keplr</Button>
             <hr />
