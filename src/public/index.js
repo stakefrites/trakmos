@@ -6,9 +6,11 @@ import ReactDOM from "react-dom";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import NetworkFinder from "../components/NetworkFinder";
+import Single from "../components/SomeTracker/Single";
 import "./index.css";
 import reportWebVitals from "../utils/reportWebVitals";
-
+import NetworkProvider from "../components/NetworkProvider";
+/* 
 Bugsnag.start({
   apiKey: "5cda10bb1c98f351cd0b722a1535d8c2",
   plugins: [new BugsnagPluginReact()],
@@ -16,20 +18,26 @@ Bugsnag.start({
   releaseStage: process.env.NODE_ENV,
 });
 
-const ErrorBoundary = Bugsnag.getPlugin("react").createErrorBoundary(React);
+const ErrorBoundary = Bugsnag.getPlugin("react").createErrorBoundary(React); */
+
+const WrappedSingle = () => {
+  return (
+    <NetworkProvider>
+      <Single />
+    </NetworkProvider>
+  );
+};
 
 ReactDOM.render(
-  <ErrorBoundary>
-    <React.StrictMode>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<NetworkFinder />} />
-          <Route path="/:network" element={<NetworkFinder />} />
-          <Route path="/:network/:operator" element={<NetworkFinder />} />
-        </Routes>
-      </BrowserRouter>
-    </React.StrictMode>
-  </ErrorBoundary>,
+  <React.StrictMode>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" exact element={<NetworkFinder />} />
+        <Route path="/:network" element={<WrappedSingle />} />
+        <Route path="/:network/:operator" element={<NetworkFinder />} />
+      </Routes>
+    </BrowserRouter>
+  </React.StrictMode>,
   document.getElementById("root")
 );
 
