@@ -1,11 +1,8 @@
 import _ from "lodash";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Spinner } from "react-bootstrap";
-import { useParams, useNavigate } from "react-router-dom";
 import Network from "../utils/Network.mjs";
 import { overrideNetworks, mapAsync } from "../utils/Helpers.mjs";
-import NewApp from "./NewApp";
 
 import { useLocalStorage } from "../hooks/hooks.js";
 
