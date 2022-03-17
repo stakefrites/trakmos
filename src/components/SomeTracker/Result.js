@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Container, Button, Badge, Stack, Table } from "react-bootstrap";
+import {
+  Container,
+  Button,
+  Badge,
+  Badge,
+  Stack,
+  Table,
+  Row,
+  Col,
+} from "react-bootstrap";
 import currency from "currency.js";
-import { CashStack } from "react-bootstrap-icons";
 import _ from "lodash";
 
 const Result = (props) => {
@@ -40,14 +48,14 @@ const Result = (props) => {
     return (
       <>
         <Container fluid>
-          <div className="col-12" align="right">
-            <button className="btn btn-outline-dark total-box disabled">
-              <CashStack className="total-box-button" size={20} />
-              <span>
-                <b>Total:</b> {currency(totalValue).format()}
-              </span>
-            </button>
-          </div>
+          <Row>
+            <Col>
+              <h2 className="mb-4 text-center total-value">
+                {currency(totalValue).format()}
+              </h2>
+            </Col>
+          </Row>
+
           <hr />
           <div className="col-12 mt-3">
             <Table responsive bordered size="md" variant="dark">
@@ -92,22 +100,32 @@ const Result = (props) => {
             </Table>
           </div>
           <hr />
-          <div>
-            <h3>We also support these chains</h3>
-            <Stack direction="horizontal" gap={1}>
-              {realBalances.map((bal) => {
-                if (bal.total === 0) {
-                  return (
-                    <>
-                      <Badge key={bal.name} bg="dark">
-                        {bal.name}
-                      </Badge>
-                    </>
-                  );
-                }
-              })}
-            </Stack>
-          </div>
+          <Row>
+            <Col>
+              <h3 className="mb-3">We also support these chains</h3>
+              <Row sm={4}>
+                {realBalances.map((bal, i) => {
+                  if (bal.total === 0) {
+                    return (
+                      <Col>
+                        <div className="m-2 badger">
+                          <Badge key={bal.name} pill bg="light">
+                            <img
+                              src={
+                                _.keyBy(props.networks, "name")[bal.name].image
+                              }
+                              height="35"
+                              width="35"
+                            />
+                          </Badge>
+                        </div>
+                      </Col>
+                    );
+                  }
+                })}
+              </Row>
+            </Col>
+          </Row>
         </Container>
       </>
     );

@@ -138,37 +138,22 @@ function SomeTrackerHome(props) {
       </div>
     );
   }
-  return (
-    <>
-      <Container>
-        <Row>
-          <Col>
-            <Button
-              variant={"outline-dark"}
-              onClick={() => {
-                props.setAddress(false);
-              }}
-            >
-              Add a new account
-            </Button>
-          </Col>
-          <Col className="mb-3 d-flex flex-row-reverse ">
-            <Button
+
+  /*  <Button
               onClick={hardRefresh}
               variant="outline-secondary"
               className="justify-content-end"
             >
-              Refresh Balances <ArrowClockwise color="black" size={16} />
+              Refresh Balances <ArrowClockwise color="black" size={13} />
             </Button>
-          </Col>
-        </Row>
+
+  */
+  return (
+    <>
+      <Container>
         <Row>
-          <Col>
-            <SavedAccounts
-              setAddress={props.setAddress}
-              accounts={props.accounts}
-            />
-          </Col>
+          <Col></Col>
+          <Col className="mb-3 d-flex flex-row-reverse "></Col>
         </Row>
       </Container>
       {balancesLoaded ? <Result balances={balances} {...props} /> : ""}

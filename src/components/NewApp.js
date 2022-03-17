@@ -149,7 +149,7 @@ const NewApp = (props) => {
   return (
     <>
       <Container>
-        <Header address={address} />
+        <Header address={address} accounts={accounts} setAddress={setAddress} />
         <div className="mb-5">
           <AlertMessage message={error} variant="danger" dismissible={false} />
           {address ? (

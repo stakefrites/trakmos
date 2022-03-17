@@ -11,7 +11,12 @@ const SavedAccounts = (props) => {
     <div>
       {Array.isArray(props.accounts) ? (
         <div>
-          <DropdownButton title="Saved Accounts" variant="dark">
+          <DropdownButton
+            className="mt-3"
+            size="sm"
+            title="Saved Accounts"
+            variant="dark"
+          >
             {props.accounts?.map((account) => {
               return (
                 <Dropdown.Item
@@ -25,6 +30,15 @@ const SavedAccounts = (props) => {
                 </Dropdown.Item>
               );
             })}
+            <Dropdown.Item
+              variant="outline-dark"
+              onClick={() => {
+                props.setAddress(false);
+              }}
+              eventKey="1"
+            >
+              Add an account
+            </Dropdown.Item>
           </DropdownButton>
         </div>
       ) : (
