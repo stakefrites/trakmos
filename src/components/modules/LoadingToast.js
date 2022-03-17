@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Row,
-  Col,
-  Card,
-  ToastContainer,
-  Toast,
-  Spinner,
-} from "react-bootstrap";
+import { ToastContainer, Toast, Spinner } from "react-bootstrap";
 
 export default LoadingToast = ({ isLoading, element }) => {
   return (
