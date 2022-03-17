@@ -2,17 +2,20 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import React, { useEffect, useState, useRef } from "react";
 import _ from "lodash";
+import SavedAccounts from "./SomeTracker/SavedAccounts";
 
 import {
   Spinner,
   Container,
   Button,
+  Card,
   Badge,
   Form,
   ProgressBar,
 } from "react-bootstrap";
 
 import SomeTrackerHome from "./SomeTracker/SomeTrackerHome";
+import ManualAddress from "./SomeTracker/ManualAddress";
 import AlertMessage from "./modules/AlertMessage";
 import Footer from "./modules/Footer";
 import Header from "./modules/Header";
@@ -21,6 +24,7 @@ import About from "./modules/About";
 import { useLocalStorage } from "../hooks/hooks";
 
 import { Bech32 } from "@cosmjs/encoding";
+import NetworkLoading from "./SomeTracker/NetworkLoading";
 
 function useUpdateEffect(effect, dependencies = []) {
   const isInitialMount = useRef(true);
@@ -33,6 +37,7 @@ function useUpdateEffect(effect, dependencies = []) {
     }
   }, dependencies);
 }
+
 const suggestChain = (network) => {
   const currency = {
     coinDenom: network.symbol,
@@ -62,9 +67,6 @@ const suggestChain = (network) => {
 };
 
 const NewApp = (props) => {
-  const isInitialMount = useRef(true);
-  const { prices } = props;
-
   const [address, setAddress] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [error, setError] = useState();
@@ -111,7 +113,9 @@ const NewApp = (props) => {
       const stargateClient = await network.signingClient(offlineSigner, key);
 
       const stargateAddress = await stargateClient.getAddress();
-      setAddress(stargateAddress);
+      const decodedAddress = Bech32.decode(stargateAddress);
+      const trackAddress = Bech32.encode("trackmos", decodedAddress.data);
+      setAddress(trackAddress);
       setStargateClient(stargateClient);
       setError(false);
       if (address !== false) {
@@ -145,7 +149,7 @@ const NewApp = (props) => {
   return (
     <>
       <Container>
-        <Header />
+        <Header address={address} />
         <div className="mb-5">
           <AlertMessage message={error} variant="danger" dismissible={false} />
           {address ? (
@@ -164,27 +168,6 @@ const NewApp = (props) => {
               {!keplr ? (
                 <>
                   <AlertMessage variant="warning" dismissible={false}>
-                    {Array.isArray(accounts) ? (
-                      <div>
-                        <p>You have {accounts.length} accounts saved</p>
-                        {accounts.map((account) => {
-                          return (
-                            <div>
-                              <Button
-                                onClick={() => {
-                                  setAddress(account);
-                                }}
-                                variant="outline-dark"
-                              >
-                                {account}
-                              </Button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      ""
-                    )}
                     Please install the{" "}
                     <a
                       href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"
@@ -196,56 +179,33 @@ const NewApp = (props) => {
                     using desktop Google Chrome.
                     <br />
                     WalletConnect and mobile support is coming soon.
-                    <hr />
-                    <Form className="manual-address" onSubmit={handleSubmit}>
-                      <Form.Group className="mb-3" controlId="formBasicEmail">
-                        <Form.Label>Enter any $COSMOS address</Form.Label>
-                        <Form.Control
-                          type="text"
-                          value={newAddress}
-                          onChange={handleManualAddress}
-                          placeholder="osmo1eh... or cosmos1eh..."
-                        />
-                      </Form.Group>
-                      <Button variant="primary" type="submit">
-                        Submit
-                      </Button>
-                    </Form>
                   </AlertMessage>
+                  <ManualAddress
+                    keplr={keplr}
+                    connect={connect}
+                    newAddress={newAddress}
+                    handleSubmit={handleSubmit}
+                    handleManualAddress={handleManualAddress}
+                  />
                 </>
               ) : (
                 <div className="mb-5 text-center">
                   {props.isNetworkLoading ? (
-                    <div className="pt-5 text-center">
-                      <p> Loading networks</p>
-                      <ProgressBar animated now={75} />
-                    </div>
+                    <NetworkLoading />
                   ) : (
-                    <>
-                      <Button onClick={connect}>Connect Keplr</Button>
-                      <hr />
-                      <Form className="manual-address" onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3" controlId="formBasicEmail">
-                          <Form.Label>Enter any $COSMOS address</Form.Label>
-                          <Form.Control
-                            type="text"
-                            value={newAddress}
-                            onChange={handleManualAddress}
-                            placeholder="osmo1eh... or cosmos1eh..."
-                          />
-                        </Form.Group>
-                        <Button variant="primary" type="submit">
-                          Submit
-                        </Button>
-                      </Form>
-                    </>
+                    <ManualAddress
+                      keplr={keplr}
+                      connect={connect}
+                      newAddress={newAddress}
+                      handleSubmit={handleSubmit}
+                      handleManualAddress={handleManualAddress}
+                    />
                   )}
                 </div>
               )}
             </div>
           )}
         </div>
-
         <Footer />
         <About show={showAbout} onHide={() => setShowAbout(false)} />
       </Container>
