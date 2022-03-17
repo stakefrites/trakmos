@@ -1,22 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Result from "./Result";
-import { Spinner, Button } from "react-bootstrap";
+import { Spinner, Button, Row, Col, Container, Badge } from "react-bootstrap";
 import { ArrowClockwise } from "react-bootstrap-icons";
 import _ from "lodash";
+import SavedAccounts from "./SavedAccounts";
 
 import { Bech32 } from "@cosmjs/encoding";
-
-function useUpdateEffect(effect, dependencies = []) {
-  const isInitialMount = useRef(true);
-
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    } else {
-      return effect();
-    }
-  }, dependencies);
-}
 
 function SomeTrackerHome(props) {
   const [balances, setBalances] = useState();
@@ -151,45 +140,37 @@ function SomeTrackerHome(props) {
   }
   return (
     <>
-      <p className="text-center">
-        <Button
-          onClick={hardRefresh}
-          variant="outline-secondary"
-          className="mb-3"
-        >
-          Refresh Balances <ArrowClockwise color="black" size={16} />
-        </Button>
-      </p>
-      <Button
-        variant={"primary"}
-        onClick={() => {
-          props.setAddress(false);
-        }}
-      >
-        Add a new account
-      </Button>
-      {Array.isArray(props.accounts) ? (
-        <div>
-          <p>You have {props.accounts.length} accounts saved</p>
-          {props.accounts?.map((account) => {
-            const styles = account == props.address ? "dark" : "outline-dark";
-            return (
-              <div key={account}>
-                <Button
-                  variant={styles}
-                  onClick={() => {
-                    props.setAddress(account);
-                  }}
-                >
-                  {account}
-                </Button>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        ""
-      )}
+      <Container>
+        <Row>
+          <Col>
+            <Button
+              variant={"outline-dark"}
+              onClick={() => {
+                props.setAddress(false);
+              }}
+            >
+              Add a new account
+            </Button>
+          </Col>
+          <Col className="mb-3 d-flex flex-row-reverse ">
+            <Button
+              onClick={hardRefresh}
+              variant="outline-secondary"
+              className="justify-content-end"
+            >
+              Refresh Balances <ArrowClockwise color="black" size={16} />
+            </Button>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <SavedAccounts
+              setAddress={props.setAddress}
+              accounts={props.accounts}
+            />
+          </Col>
+        </Row>
+      </Container>
       {balancesLoaded ? <Result balances={balances} {...props} /> : ""}
     </>
   );

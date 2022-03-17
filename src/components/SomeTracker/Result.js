@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Container, Button } from "react-bootstrap";
-import Table from "react-bootstrap/Table";
+import { useNavigate, useParams } from "react-router-dom";
+import { Container, Button, Badge, Stack, Table } from "react-bootstrap";
 import currency from "currency.js";
 import { CashStack } from "react-bootstrap-icons";
 import _ from "lodash";
 
 const Result = (props) => {
+  const navigate = useNavigate();
+  const params = useParams();
   let totalValue = 0;
 
   if (props.balances !== undefined && props.balances) {
@@ -32,18 +34,23 @@ const Result = (props) => {
         };
       }
     });
+
+    // ADD ON TR
+    // navigate("/" + bal.name);
     return (
       <>
         <Container fluid>
           <div className="col-12" align="right">
-            <p>{props.address}</p>
-            <button className="btn btn-outline-dark total-box">
+            <button className="btn btn-outline-dark total-box disabled">
               <CashStack className="total-box-button" size={20} />
-              <span> {currency(totalValue).format()}</span>
+              <span>
+                <b>Total:</b> {currency(totalValue).format()}
+              </span>
             </button>
           </div>
+          <hr />
           <div className="col-12 mt-3">
-            <Table striped bordered hover responsive variant="dark">
+            <Table responsive bordered size="md" variant="dark">
               <thead>
                 <tr>
                   <th>Price</th>
@@ -59,7 +66,7 @@ const Result = (props) => {
                 {realBalances.map((bal) => {
                   if (bal.total > 0) {
                     return (
-                      <tr key={bal.chainAddress}>
+                      <tr key={bal.name} onClick={() => {}}>
                         <td>
                           {currency(bal.price, { precision: 3 }).format()}
                         </td>
@@ -83,6 +90,23 @@ const Result = (props) => {
                 })}
               </tbody>
             </Table>
+          </div>
+          <hr />
+          <div>
+            <h3>We also support these chains</h3>
+            <Stack direction="horizontal" gap={1}>
+              {realBalances.map((bal) => {
+                if (bal.total === 0) {
+                  return (
+                    <>
+                      <Badge key={bal.name} bg="dark">
+                        {bal.name}
+                      </Badge>
+                    </>
+                  );
+                }
+              })}
+            </Stack>
           </div>
         </Container>
       </>
