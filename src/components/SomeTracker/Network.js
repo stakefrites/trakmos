@@ -7,8 +7,10 @@ import Network from "../../utils/Network.mjs";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import currency from "currency.js";
 import _ from "lodash";
+import NetworkProvider from "../NetworkProvider";
+import PricesProvider from "../PricesProvider";
 
-export default Single = (props) => {
+const Single = (props) => {
   const [network, setNetwork] = useState(false);
   const [balance, setBalance] = useState(false);
   const [isNetworkLoading, setIsNetworkLoading] = useState(true);
@@ -161,3 +163,11 @@ export default Single = (props) => {
     </>
   );
 };
+
+export default (
+  <NetworkProvider>
+    <PricesProvider>
+      <Network />
+    </PricesProvider>
+  </NetworkProvider>
+);

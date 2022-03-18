@@ -21,16 +21,6 @@ Bugsnag.start({
 
 const ErrorBoundary = Bugsnag.getPlugin("react").createErrorBoundary(React); */
 
-const WrappedNetwork = () => {
-  return (
-    <NetworkProvider>
-      <PricesProvider>
-        <Network />
-      </PricesProvider>
-    </NetworkProvider>
-  );
-};
-
 const WrappedStake = () => {
   return (
     <NetworkProvider>
@@ -66,7 +56,7 @@ ReactDOM.render(
       <Routes>
         <Route path="/" exact element={<NetworkFinder />} />
         <Route path="/portfolio" exact element={<NetworkFinder />} />
-        <Route path="/:network/network" element={<WrappedNetwork />} />
+        <Route path="/:network/network" element={<Network />} />
         <Route path="/:network/stake" element={<WrappedStake />} />
         <Route path="/:network/gov" element={<WrappedNetwork />} />
         <Route path="/:network/stake/:operator" element={<NetworkFinder />} />
