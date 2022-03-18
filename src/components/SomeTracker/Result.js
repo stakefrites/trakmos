@@ -74,7 +74,12 @@ const Result = (props) => {
                 {realBalances.map((bal) => {
                   if (bal.total > 0) {
                     return (
-                      <tr key={bal.name} onClick={() => {}}>
+                      <tr
+                        key={bal.name}
+                        onClick={() => {
+                          navigate("/" + bal.name);
+                        }}
+                      >
                         <td>
                           {currency(bal.price, { precision: 3 }).format()}
                         </td>

@@ -15,29 +15,6 @@ function NetworkProvider(props) {
   const [networkProgress, setNetworkProgress] = useState(0);
   const [error, setError] = useState(false);
   const [prices, setPrices] = useLocalStorage("prices", false);
-  //const [prices, setPrices] = useState();
-  const [isPricesLoading, setIsPricesLoading] = useState(true);
-
-  const getPrices = async (networks, hardRefresh) => {
-    const network = networks[0];
-
-    setIsPricesLoading(true);
-
-    const pricesData = await network.queryClient.getPrice(networks);
-    setPrices(pricesData);
-    pricesData.map((price) => {
-      localStorage.setItem(
-        price.coingecko_id,
-        JSON.stringify({ price: price, time: +new Date() })
-      );
-    });
-    setPrices(pricesData);
-    localStorage.setItem(
-      "prices",
-      JSON.stringify({ prices: pricesData.prices, time: +new Date() })
-    );
-    setIsPricesLoading(false);
-  };
 
   const getNetworks = async () => {
     const registryNetworks = await axios
@@ -59,7 +36,6 @@ function NetworkProvider(props) {
         return newData;
       }
     );
-    console.log(newNetworks);
     setNetworks(newNetworks);
 
     return _.compact(newNetworks).reduce((a, v) => ({ ...a, [v.name]: v }), {});
@@ -70,7 +46,6 @@ function NetworkProvider(props) {
     getNetworks().then((networks) => {
       setNetworks(networks);
       setIsNetworkLoading(false);
-      setNetworks(networks);
     });
   }, []);
 
@@ -82,38 +57,7 @@ function NetworkProvider(props) {
     setNetwork(network);
   }; */
 
-  useEffect(() => {
-    /*  if (networks.length) {
-      console.log("Ça roule?");
-      setIsNetworkLoading(true);
-      getNetworks().then((networks) => {
-        return mapAsync(Object.values(networks), async (network) => {
-          const newData = await Network(network);
-          return newData;
-        }).then((data) => {
-          setNetworks(data);
-          setIsNetworkLoading(false);
-          setNetworkProgress(100);
-          getPrices(data);
-          setIsPricesLoading(false);
-          getAprs(data);
-        });
-      });
-    } */
-  }, [networks]);
-
-  /*  if (isNetworkLoading) {
-    return (
-      <div className="pt-5 text-center">
-        <p> Initializing blockchain data...</p>
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">
-            Initializing blockchain data...
-          </span>
-        </Spinner>
-      </div>
-    );
-  } */
+  useEffect(() => {}, [networks]);
 
   if (error) {
     return <p>Loading failed</p>;
@@ -123,11 +67,10 @@ function NetworkProvider(props) {
   return (
     <>
       {React.cloneElement(props.children, {
-        price: _.keyBy(prices, "coingecko_id"),
         isNetworkLoading,
-        isPricesLoading,
         networks,
         networkProgress,
+        ...props,
       })}
     </>
   );

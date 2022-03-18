@@ -17,14 +17,15 @@ const SavedAccounts = (props) => {
             title="Saved Accounts"
             variant="dark"
           >
-            {props.accounts?.map((account) => {
+            {props.accounts?.map((account, i) => {
               return (
                 <Dropdown.Item
                   variant="outline-dark"
                   onClick={() => {
                     props.setAddress(account);
                   }}
-                  eventKey="1"
+                  eventKey={i}
+                  key={i}
                 >
                   {resizeAddress(account)}
                 </Dropdown.Item>
@@ -35,7 +36,8 @@ const SavedAccounts = (props) => {
               onClick={() => {
                 props.setAddress(false);
               }}
-              eventKey="1"
+              key={"100"}
+              eventKey="100"
             >
               Add an account
             </Dropdown.Item>

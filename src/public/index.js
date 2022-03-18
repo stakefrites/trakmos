@@ -6,10 +6,11 @@ import ReactDOM from "react-dom";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import NetworkFinder from "../components/NetworkFinder";
-//import Single from "../components/SomeTracker/Single";
+import Single from "../components/SomeTracker/Single";
 import "./index.css";
 import reportWebVitals from "../utils/reportWebVitals";
-//import NetworkProvider from "../components/NetworkProvider";
+import NetworkProvider from "../components/NetworkProvider";
+import PricesProvider from "../components/PricesProvider";
 /* 
 Bugsnag.start({
   apiKey: "5cda10bb1c98f351cd0b722a1535d8c2",
@@ -20,20 +21,21 @@ Bugsnag.start({
 
 const ErrorBoundary = Bugsnag.getPlugin("react").createErrorBoundary(React); */
 
-/* const WrappedSingle = () => {
+const WrappedSingle = () => {
   return (
     <NetworkProvider>
-      <Single />
+      <PricesProvider>
+        <Single />
+      </PricesProvider>
     </NetworkProvider>
   );
-}; */
-//  <Route path="/:network" element={<WrappedSingle />} />
+};
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" exact element={<NetworkFinder />} />
-
+        <Route path="/:network" element={<WrappedSingle />} />
         <Route path="/:network/:operator" element={<NetworkFinder />} />
       </Routes>
     </BrowserRouter>

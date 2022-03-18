@@ -18,7 +18,7 @@ export default Single = (props) => {
   };
 
   useEffect(() => {
-    if (props.networks.length && !network) {
+    if (props.networks && !network) {
       const networkName = params.network || props.networks[0];
       const currentNetwork = props.networks.find(
         (el) => el.name === params.network
