@@ -85,7 +85,7 @@ const Result = (props) => {
                     <ListGroup.Item
                       key={bal.name}
                       onClick={() => {
-                        navigate("/" + bal.name, {
+                        navigate("/" + bal.name + "/network", {
                           state: {
                             address: props.address,
                             balances: props.balances,

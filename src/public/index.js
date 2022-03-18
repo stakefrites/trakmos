@@ -6,7 +6,7 @@ import ReactDOM from "react-dom";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import NetworkFinder from "../components/NetworkFinder";
-import Single from "../components/SomeTracker/Single";
+import Network from "../components/SomeTracker/Network";
 import "./index.css";
 import reportWebVitals from "../utils/reportWebVitals";
 import NetworkProvider from "../components/NetworkProvider";
@@ -21,22 +21,55 @@ Bugsnag.start({
 
 const ErrorBoundary = Bugsnag.getPlugin("react").createErrorBoundary(React); */
 
-const WrappedSingle = () => {
+const WrappedNetwork = () => {
   return (
     <NetworkProvider>
       <PricesProvider>
-        <Single />
+        <Network />
       </PricesProvider>
     </NetworkProvider>
   );
 };
+
+const WrappedStake = () => {
+  return (
+    <NetworkProvider>
+      <PricesProvider>
+        <Stake />
+      </PricesProvider>
+    </NetworkProvider>
+  );
+};
+const WrappedFolio = () => {
+  return (
+    <NetworkProvider>
+      <PricesProvider>
+        <Stake />
+      </PricesProvider>
+    </NetworkProvider>
+  );
+};
+
+const WrappedGov = () => {
+  return (
+    <NetworkProvider>
+      <PricesProvider>
+        <Stake />
+      </PricesProvider>
+    </NetworkProvider>
+  );
+};
+
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" exact element={<NetworkFinder />} />
-        <Route path="/:network" element={<WrappedSingle />} />
-        <Route path="/:network/:operator" element={<NetworkFinder />} />
+        <Route path="/portfolio" exact element={<NetworkFinder />} />
+        <Route path="/:network/network" element={<WrappedNetwork />} />
+        <Route path="/:network/stake" element={<WrappedStake />} />
+        <Route path="/:network/gov" element={<WrappedNetwork />} />
+        <Route path="/:network/stake/:operator" element={<NetworkFinder />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,
