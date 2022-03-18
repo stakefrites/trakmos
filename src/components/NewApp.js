@@ -114,7 +114,7 @@ const NewApp = (props) => {
 
       const stargateAddress = await stargateClient.getAddress();
       const decodedAddress = Bech32.decode(stargateAddress);
-      const trackAddress = Bech32.encode("trackmos", decodedAddress.data);
+      const trackAddress = Bech32.encode("trakmos", decodedAddress.data);
       setAddress(trackAddress);
       setStargateClient(stargateClient);
       setError(false);
@@ -127,7 +127,7 @@ const NewApp = (props) => {
     const network = props.networks[0];
     const chainId = network?.chainId;
     const key = await window.keplr.getKey(chainId);
-    const address = Bech32.encode("trackmos", key.address);
+    const address = Bech32.encode("trakmos", key.address);
     setAddress(address);
   };
 
