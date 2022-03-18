@@ -206,7 +206,7 @@ const NewApp = (props) => {
             </div>
           )}
         </div>
-        <Footer />
+        <Footer className="fixed-bottom" />
         <About show={showAbout} onHide={() => setShowAbout(false)} />
       </Container>
     </>

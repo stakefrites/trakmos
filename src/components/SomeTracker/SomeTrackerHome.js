@@ -89,7 +89,7 @@ function SomeTrackerHome(props) {
 
   const saveAccounts = (address) => {
     const decodedAddress = Bech32.decode(address);
-    const trackAddress = Bech32.encode("trackmos", decodedAddress.data);
+    const trackAddress = Bech32.encode("trakmos", decodedAddress.data);
 
     const myAccounts = props.accounts;
     const newAccounts = myAccounts

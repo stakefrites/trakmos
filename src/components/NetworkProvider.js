@@ -37,16 +37,16 @@ function NetworkProvider(props) {
       }
     );
     setNetworks(newNetworks);
+    setIsNetworkLoading(false);
 
     return _.compact(newNetworks).reduce((a, v) => ({ ...a, [v.name]: v }), {});
   };
 
   useEffect(() => {
-    setIsNetworkLoading(true);
-    getNetworks().then((networks) => {
-      setNetworks(networks);
-      setIsNetworkLoading(false);
-    });
+    if (!networks.length) {
+      setIsNetworkLoading(true);
+      getNetworks();
+    }
   }, []);
 
   const getAprs = async (networks) => {
@@ -70,7 +70,6 @@ function NetworkProvider(props) {
         isNetworkLoading,
         networks,
         networkProgress,
-        ...props,
       })}
     </>
   );

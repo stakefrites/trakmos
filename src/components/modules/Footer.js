@@ -2,7 +2,7 @@ import { Twitter, Github } from "react-bootstrap-icons";
 import PoweredByAkash from "../../assets/powered-by-akash.svg";
 const Footer = () => {
   return (
-    <footer className="align-items-center py-3 my-4 border-top row">
+    <footer className=" align-items-center py-3 my-4 border-top row">
       <div className="col-md-4 col-sm-12 col-12 mt-2">
         <a
           href="https://akash.network"

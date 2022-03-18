@@ -1,3 +1,42 @@
+.total-value {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.toaster {
+  max-width: 45%;
+}
+
+.badger {
+  display: flex;
+  justify-content: center;
+}
+
+.logo-title {
+  font-family: "Titillium Web", sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  font-family: "Titillium Web", sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0;
+  padding: 0;
+}
+
+h1,
+h3 {
+  font-family: "Titillium Web", sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  padding: 0;
+}
+
 header a.moniker {
   margin-left: 15px;
 }
@@ -47,10 +86,10 @@ header a.moniker {
   cursor: default;
 }
 
-.total-box-button{
+.total-box-button {
   margin-right: 15px;
 }
 
-.total-box-button:hover{
+.total-box-button:hover {
   color: #fff;
 }

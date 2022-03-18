@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useLocalStorage } from "../hooks/hooks.js";
 
 function PricesProvider(props) {
+  console.log("prices provider props", props);
   const [error, setError] = useState(false);
   //const [prices, setPrices] = useLocalStorage("prices", []);
   const [prices, setPrices] = useState();
@@ -16,16 +17,15 @@ function PricesProvider(props) {
     setIsPricesLoading(true);
 
     const pricesData = await network.queryClient.getPrice(networks);
+    console.log("prices Data", pricesData);
     setPrices(pricesData);
+    setIsPricesLoading(false);
     pricesData.map((price) => {
       localStorage.setItem(
         price.coingecko_id,
         JSON.stringify({ price: price, time: +new Date() })
       );
     });
-    setPrices(pricesData);
-
-    setIsPricesLoading(false);
   };
 
   useEffect(() => {
@@ -44,6 +44,8 @@ function PricesProvider(props) {
       {React.cloneElement(props.children, {
         prices: _.keyBy(prices, "coingecko_id"),
         isPricesLoading,
+        isNetworkLoading: props.isNetworkLoading,
+        networks: props.networks,
       })}
     </>
   );

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   Container,
   Button,
+  ListGroup,
   Badge,
   Badge,
   Stack,
@@ -45,6 +46,26 @@ const Result = (props) => {
 
     // ADD ON TR
     // navigate("/" + bal.name);
+
+    /*
+ <td>
+                            {currency(bal.price, { precision: 3 }).format()}
+                          </td>
+                          <td width="auto">
+                            <img
+                              src={
+                                _.keyBy(props.networks, "name")[bal.name].image
+                              }
+                              height="30"
+                              width="30"
+                            />
+                          </td>
+                          <td>{bal.liquid}</td>
+                          <td>{bal.staked}</td>
+                          <td>{bal.rewards.toFixed(2)}</td>
+                          <td>{bal.total.toFixed(2)}</td>
+                          <td>{currency(bal.value).format()}</td>
+    */
     return (
       <>
         <Container fluid>
@@ -56,34 +77,26 @@ const Result = (props) => {
             </Col>
           </Row>
 
-          <hr />
-          <div className="col-12 mt-3">
-            <Table responsive bordered size="md" variant="dark">
-              <thead>
-                <tr>
-                  <th>Price</th>
-                  <th>Chain</th>
-                  <th>Balance</th>
-                  <th>Delegated</th>
-                  <th>Rewards</th>
-                  <th>Total</th>
-                  <th>Value (in USD)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {realBalances.map((bal) => {
-                  if (bal.total > 0) {
-                    return (
-                      <tr
-                        key={bal.name}
-                        onClick={() => {
-                          navigate("/" + bal.name);
-                        }}
-                      >
-                        <td>
-                          {currency(bal.price, { precision: 3 }).format()}
-                        </td>
-                        <td width="auto">
+          <div className="col-12 mb-5">
+            <ListGroup as="ol">
+              {realBalances.map((bal) => {
+                if (bal.total > 0) {
+                  return (
+                    <ListGroup.Item
+                      key={bal.name}
+                      onClick={() => {
+                        navigate("/" + bal.name, {
+                          state: {
+                            address: props.address,
+                            balances: props.balances,
+                          },
+                        });
+                      }}
+                      as="li"
+                      className="d-flex justify-content-between align-items-start"
+                    >
+                      <div>
+                        <Badge pill bg="dark">
                           <img
                             src={
                               _.keyBy(props.networks, "name")[bal.name].image
@@ -91,36 +104,36 @@ const Result = (props) => {
                             height="30"
                             width="30"
                           />
-                        </td>
-                        <td>{bal.liquid}</td>
-                        <td>{bal.staked}</td>
-                        <td>{bal.rewards.toFixed(2)}</td>
-                        <td>{bal.total.toFixed(2)}</td>
-                        <td>{currency(bal.value).format()}</td>
-                      </tr>
-                    );
-                  }
-                })}
-              </tbody>
-            </Table>
+                        </Badge>
+                      </div>
+                      <div className="ms-2 me-auto">
+                        <div className="fw-bold">{bal.name}</div>
+                      </div>
+                      <p>{currency(bal.value, { precision: 3 }).format()}</p>
+                    </ListGroup.Item>
+                  );
+                }
+              })}
+            </ListGroup>
           </div>
-          <hr />
           <Row>
             <Col>
-              <h3 className="mb-3">We also support these chains</h3>
-              <Row sm={4}>
+              <Row>
+                <h2 className="mb-5 support">We also support these chains</h2>
+              </Row>
+              <Row sm={4} className="mb-5">
                 {realBalances.map((bal, i) => {
                   if (bal.total === 0) {
                     return (
-                      <Col>
+                      <Col className="mb-5">
                         <div className="m-2 badger">
                           <Badge key={bal.name} pill bg="light">
                             <img
                               src={
                                 _.keyBy(props.networks, "name")[bal.name].image
                               }
-                              height="35"
-                              width="35"
+                              height="100"
+                              width="100"
                             />
                           </Badge>
                         </div>

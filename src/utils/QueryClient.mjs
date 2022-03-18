@@ -335,6 +335,67 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     return mappedRequest;
   };
 
+  const getSingleBalance = async (a, chain) => {
+    const bech = Bech32.decode(a);
+    const { decimals, prefix, coingecko_id, denom, name } = chain;
+
+    const chainAddress = Bech32.encode(prefix, bech.data);
+
+    const client = await makeClient(chain.rpcUrl);
+    let all = await client.bank.totalSupply();
+
+    let liquid;
+    try {
+      liquid = await await client.bank.allBalances(chainAddress);
+    } catch (error) {
+      console.log("Error in all balances", error);
+      liquid = { delegationResponses: [] };
+    }
+    const rewardsReq = await client.distribution.delegationTotalRewards(
+      chainAddress
+    );
+
+    let staked;
+    try {
+      staked = await client.staking.delegatorDelegations(chainAddress);
+    } catch (error) {
+      staked = { delegationResponses: [] };
+    }
+    const stakingAcc = 0;
+    const rewardsAcc = 0;
+
+    const totalTokensStaked =
+      staked.delegationResponses.length == 0
+        ? 0
+        : staked.delegationResponses.reduce(stakedReducer, stakingAcc);
+
+    const totalTokensRewards =
+      rewardsReq.rewards.length == 0
+        ? 0
+        : rewardsReq.rewards.reduce(rewardsReducer, rewardsAcc);
+
+    const liquidBal = liquid.find((val) => (val.denom == denom ? true : false));
+    const rewards = totalTokensRewards / Math.pow(10, decimals + 18);
+
+    const stakedBalance = (totalTokensStaked / Math.pow(10, decimals)).toFixed(
+      2
+    );
+    const liquidBalance = liquidBal
+      ? (parseFloat(liquidBal.amount) / Math.pow(10, decimals)).toFixed(2)
+      : 0;
+    const total =
+      rewards + parseFloat(stakedBalance) + parseFloat(liquidBalance);
+    return {
+      name,
+      rewards,
+      staked: parseFloat(stakedBalance),
+      liquid: parseFloat(liquidBalance),
+      coingecko_id,
+      total,
+      chainAddress,
+    };
+  };
+
   const getPortfolio = async (a, chains) => {
     const bech = Bech32.decode(a);
     const portfolio = [];
@@ -414,6 +475,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     getAllValidatorDelegations,
     getValidatorDelegations,
     getBalance,
+    getSingleBalance,
     getDelegations,
     getRewards,
     getGrants,
